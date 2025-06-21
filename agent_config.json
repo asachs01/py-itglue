@@ -1,0 +1,32 @@
+{
+  "name": "ITGlueSDK",
+  "goal": "Comprehensive Python SDK for ITGlue API with AI agent capabilities",
+  "constraints": [
+    "Python 3.10+ only",
+    "API key authentication only", 
+    "Follow JSON API specification",
+    "Maintain >90% test coverage",
+    "Production-ready error handling"
+  ],
+  "success_criteria": {
+    "avg_response_time": "<3s",
+    "satisfaction_score": ">=4.5",
+    "resolution_rate": ">=90%",
+    "test_coverage": ">=90%",
+    "api_endpoint_coverage": "100%"
+  },
+  "version": "0.1.0",
+  "features": [
+    "Complete API endpoint coverage",
+    "Built-in pagination handling",
+    "Rate limiting and caching",
+    "Data validation with Pydantic",
+    "Bulk operations support",
+    "AI agent integration ready"
+  ],
+  "target_environments": [
+    "https://api.itglue.com",
+    "https://api.eu.itglue.com", 
+    "https://api.au.itglue.com"
+  ]
+} 
