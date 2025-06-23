@@ -9,7 +9,7 @@ import pytest
 import requests
 
 from itglue.config import ITGlueConfig, ITGlueRegion
-from itglue.http_client import ITGlueHTTPClient, RateLimiter
+from itglue.http_client import ITGlueHTTPClient, SimpleRateLimiter
 from itglue.exceptions import (
     ITGlueAPIError,
     ITGlueAuthError,
@@ -21,12 +21,12 @@ from itglue.exceptions import (
 )
 
 
-class TestRateLimiter:
+class TestSimpleRateLimiter:
     """Test rate limiting functionality."""
 
     def test_rate_limiter_initialization(self):
         """Test rate limiter initialization."""
-        limiter = RateLimiter(requests_per_minute=60, requests_per_5_minutes=300)
+        limiter = SimpleRateLimiter(requests_per_minute=60, requests_per_5_minutes=300)
 
         assert limiter.requests_per_minute == 60
         assert limiter.requests_per_5_minutes == 300
@@ -35,7 +35,7 @@ class TestRateLimiter:
 
     def test_rate_limiter_no_wait_when_under_limit(self):
         """Test that no waiting occurs when under rate limit."""
-        limiter = RateLimiter(requests_per_minute=60)
+        limiter = SimpleRateLimiter(requests_per_minute=60)
 
         start_time = time.time()
         limiter.wait_if_needed()
@@ -47,7 +47,7 @@ class TestRateLimiter:
 
     def test_rate_limiter_cleanup_old_requests(self):
         """Test cleanup of old request timestamps."""
-        limiter = RateLimiter(requests_per_minute=60)
+        limiter = SimpleRateLimiter(requests_per_minute=60)
 
         # Add old requests
         old_time = time.time() - 120  # 2 minutes ago
