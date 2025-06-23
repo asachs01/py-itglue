@@ -10,6 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Future features will be documented here
 
+## [0.2.3] - 2025-01-26
+
+### Fixed
+- Import errors in test suite (RateLimiter → SimpleRateLimiter references)
+- Missing asyncio marker in pytest configuration causing test collection failures
+- Test class names updated for consistency with renamed components
+
+### Added
+- pytest-asyncio dependency for proper async test support
+- Enhanced pytest configuration with all required markers
+
+### Changed
+- Updated test imports to match refactored component names
+- Improved test configuration for better CI/CD compatibility
+
 ## [0.2.2] - 2025-01-26
 
 ### Fixed
