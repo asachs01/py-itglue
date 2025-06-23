@@ -23,6 +23,15 @@ from .exceptions import (
     ITGlueCacheError,
     ITGlueBulkOperationError,
 )
+from .models import (
+    ITGlueResource,
+    ITGlueResourceCollection,
+    ResourceType,
+    Organization,
+    OrganizationCollection,
+    Configuration,
+    ConfigurationCollection,
+)
 
 __all__ = [
     "__version__",
@@ -44,4 +53,12 @@ __all__ = [
     "ITGlueTimeoutError",
     "ITGlueCacheError",
     "ITGlueBulkOperationError",
+    # Models
+    "ITGlueResource",
+    "ITGlueResourceCollection",
+    "ResourceType",
+    "Organization",
+    "OrganizationCollection",
+    "Configuration",
+    "ConfigurationCollection",
 ] 
