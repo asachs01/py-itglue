@@ -6,7 +6,8 @@ organizational unit for most other resources.
 """
 
 from enum import Enum
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict, Union, Type
+from datetime import datetime
 
 from pydantic import Field, field_validator
 
@@ -127,16 +128,14 @@ class Organization(ITGlueResource):
 
     # Timestamps
     @property
-    def created_at(self) -> Optional[ITGlueDateTime]:
-        """Creation timestamp."""
-        value = self.get_attribute("created-at")
-        return ITGlueDateTime.validate(value) if value else None
+    def created_at(self) -> Optional[datetime]:
+        """Get created timestamp."""
+        return self._parse_datetime(self.get_attribute("created-at"))
 
     @property
-    def updated_at(self) -> Optional[ITGlueDateTime]:
-        """Last update timestamp."""
-        value = self.get_attribute("updated-at")
-        return ITGlueDateTime.validate(value) if value else None
+    def updated_at(self) -> Optional[datetime]:
+        """Get updated timestamp."""
+        return self._parse_datetime(self.get_attribute("updated-at"))
 
     # Relationship helpers
     @property
@@ -183,9 +182,20 @@ class OrganizationCollection(ITGlueResourceCollection[Organization]):
     """Collection of Organization resources."""
 
     @classmethod
-    def from_api_dict(cls, data: dict) -> "OrganizationCollection":
-        """Create collection from API response."""
-        return super().from_api_dict(data, Organization)
+    def from_api_dict(
+        cls, data: Dict[str, Any], resource_class: Optional[Type[Organization]] = None
+    ) -> "OrganizationCollection":
+        """Create OrganizationCollection from API response."""
+        if resource_class is None:
+            resource_class = Organization
+        
+        base_collection = super().from_api_dict(data, resource_class)
+        return cls(
+            data=base_collection.data,
+            meta=base_collection.meta,
+            links=base_collection.links,
+            included=base_collection.included,
+        )
 
     def get_by_name(self, name: str) -> Optional[Organization]:
         """Find organization by name."""

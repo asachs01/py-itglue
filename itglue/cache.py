@@ -9,7 +9,7 @@ import json
 import hashlib
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable, Union
 import structlog
 
 from .config import ITGlueConfig
@@ -48,37 +48,24 @@ class CacheBackend(ABC):
 class MemoryCache(CacheBackend):
     """In-memory cache backend."""
 
-    def __init__(self, max_size: int = 1000):
-        self.cache = {}
-        self.access_times = {}
+    def __init__(self, max_size: int = 1000, ttl: int = 3600):
         self.max_size = max_size
+        self.ttl = ttl
+        self.cache: Dict[str, Any] = {}
+        self.access_times: Dict[str, float] = {}
         self.logger = structlog.get_logger().bind(component="memory_cache")
 
-    def _cleanup_if_needed(self) -> None:
-        """Remove oldest entries if cache is full."""
-        if len(self.cache) >= self.max_size:
-            # Remove 20% of oldest entries
-            num_to_remove = max(1, self.max_size // 5)
-            oldest_keys = sorted(
-                self.access_times.keys(), key=lambda k: self.access_times[k]
-            )[:num_to_remove]
-
-            for key in oldest_keys:
-                del self.cache[key]
-                del self.access_times[key]
-
-            self.logger.info(
-                "Cleaned up cache",
-                removed_entries=num_to_remove,
-                remaining_entries=len(self.cache),
-            )
-
-    def _is_expired(self, entry: Dict[str, Any]) -> bool:
-        """Check if cache entry is expired."""
-        if "expires_at" not in entry:
-            return False
-
-        return time.time() > entry["expires_at"]
+    def _cleanup_expired(self) -> None:
+        """Remove expired cache entries."""
+        current_time = time.time()
+        expired_keys = [
+            key
+            for key, access_time in self.access_times.items()
+            if current_time - access_time > self.ttl
+        ]
+        for key in expired_keys:
+            self.cache.pop(key, None)
+            self.access_times.pop(key, None)
 
     def get(self, key: str) -> Optional[Dict[str, Any]]:
         """Get value from cache."""
@@ -100,7 +87,7 @@ class MemoryCache(CacheBackend):
 
     def set(self, key: str, value: Dict[str, Any], ttl: Optional[int] = None) -> None:
         """Set value in cache with optional TTL."""
-        self._cleanup_if_needed()
+        self._cleanup_expired()
 
         entry = {"data": value}
 
@@ -134,6 +121,13 @@ class MemoryCache(CacheBackend):
             return False
 
         return True
+
+    def _is_expired(self, entry: Dict[str, Any]) -> bool:
+        """Check if cache entry is expired."""
+        if "expires_at" not in entry:
+            return False
+
+        return time.time() > entry["expires_at"]
 
 
 class RedisCache(CacheBackend):
@@ -364,3 +358,29 @@ class CacheManager:
         # For now, we'll just clear everything
         # TODO: Implement pattern-based invalidation
         self.clear()
+
+
+def create_cache_manager(cache_config: Optional[Dict[str, Any]] = None) -> CacheManager:
+    """Create a cache manager based on configuration."""
+    if not cache_config:
+        return MemoryCache()
+
+    cache_type = cache_config.get("type", "memory")
+
+    if cache_type == "memory":
+        return MemoryCache(
+            max_size=cache_config.get("max_size", 1000),
+            ttl=cache_config.get("ttl", 3600),
+        )
+    elif cache_type == "redis":
+        redis_config = cache_config.get("redis", {})
+        cache_manager: CacheManager = RedisCache(
+            host=redis_config.get("host", "localhost"),
+            port=redis_config.get("port", 6379),
+            db=redis_config.get("db", 0),
+            password=redis_config.get("password"),
+            ttl=cache_config.get("ttl", 3600),
+        )
+        return cache_manager
+    else:
+        raise ValueError(f"Unknown cache type: {cache_type}")

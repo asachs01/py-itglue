@@ -10,7 +10,7 @@ Handles all HTTP interactions with the ITGlue API including:
 
 import json
 import time
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin, urlencode
 
 import requests
@@ -35,16 +35,14 @@ from .exceptions import (
 )
 
 
-class RateLimiter:
-    """Simple rate limiter for ITGlue API requests."""
+class SimpleRateLimiter:
+    """Simple rate limiter for API requests."""
 
-    def __init__(
-        self, requests_per_minute: int = 3000, requests_per_5_minutes: int = 3000
-    ):
+    def __init__(self, requests_per_minute: int = 120, requests_per_5_minutes: int = 500):
         self.requests_per_minute = requests_per_minute
         self.requests_per_5_minutes = requests_per_5_minutes
-        self.minute_requests = []
-        self.five_minute_requests = []
+        self.minute_requests: List[float] = []
+        self.five_minute_requests: List[float] = []
 
     def wait_if_needed(self) -> None:
         """Wait if rate limits would be exceeded."""
@@ -101,7 +99,7 @@ class ITGlueHTTPClient:
         self.session.headers.update(config.get_headers())
 
         # Set up rate limiter
-        self.rate_limiter = RateLimiter(
+        self.rate_limiter = SimpleRateLimiter(
             requests_per_minute=config.requests_per_minute,
             requests_per_5_minutes=config.requests_per_5_minutes,
         )

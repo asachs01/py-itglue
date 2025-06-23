@@ -7,7 +7,7 @@ reputation scoring, and MyGlue integration support.
 """
 
 from datetime import datetime
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, Dict, Any, List, Union, Type
 from enum import Enum
 
 from .base import BaseModel, ITGlueResource, ResourceType, ITGlueResourceCollection
@@ -280,9 +280,20 @@ class UserCollection(ITGlueResourceCollection[User]):
     """Collection class for managing multiple User objects."""
 
     @classmethod
-    def from_api_dict(cls, data: dict) -> "UserCollection":
-        """Create collection from API response."""
-        return super().from_api_dict(data, User)
+    def from_api_dict(
+        cls, data: Dict[str, Any], resource_class: Optional[Type[User]] = None
+    ) -> "UserCollection":
+        """Create UserCollection from API response."""
+        if resource_class is None:
+            resource_class = User
+        
+        base_collection = super().from_api_dict(data, resource_class)
+        return cls(
+            data=base_collection.data,
+            meta=base_collection.meta,
+            links=base_collection.links,
+            included=base_collection.included,
+        )
 
     def find_by_email(self, email: str) -> Optional[User]:
         """Find a user by email address."""
@@ -343,25 +354,24 @@ class UserCollection(ITGlueResourceCollection[User]):
 
     def get_role_distribution(self) -> Dict[str, int]:
         """Get distribution of users by role."""
-        distribution = {}
+        distribution: Dict[str, int] = {}
         for user in self.data:
             role = user.role_name or "Unknown"
             distribution[role] = distribution.get(role, 0) + 1
         return distribution
 
-    def get_my_glue_statistics(self) -> Dict[str, int]:
+    def get_my_glue_statistics(self) -> Dict[str, Union[int, float]]:
         """Get MyGlue access statistics."""
         total = len(self.data)
-        with_access = len(self.filter_by_my_glue_access(True))
+        with_access = len([u for u in self.data if u.has_my_glue_access()])
         without_access = total - with_access
+        percentage = round((with_access / total * 100), 2) if total > 0 else 0.0
 
         return {
             "total_users": total,
             "with_my_glue_access": with_access,
             "without_my_glue_access": without_access,
-            "my_glue_adoption_percentage": round(
-                (with_access / total * 100) if total > 0 else 0, 2
-            ),
+            "my_glue_adoption_percentage": percentage,
         }
 
     def to_list(self) -> List[User]:

@@ -6,7 +6,8 @@ servers, workstations, network devices, and other infrastructure components.
 """
 
 from enum import Enum
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict, Union, Type
+from datetime import datetime
 
 from pydantic import Field, field_validator
 
@@ -160,47 +161,29 @@ class Configuration(ITGlueResource):
         self.set_attribute("installed-by", value)
 
     @property
-    def purchased_at(self) -> Optional[ITGlueDateTime]:
-        """Purchase date."""
-        value = self.get_attribute("purchased-at")
-        return ITGlueDateTime.validate(value) if value else None
-
-    @purchased_at.setter
-    def purchased_at(self, value: Optional[ITGlueDateTime]) -> None:
-        self.set_attribute("purchased-at", value)
+    def created_at(self) -> Optional[datetime]:
+        """Get created timestamp."""
+        return self._parse_datetime(self.get_attribute("created-at"))
 
     @property
-    def installed_at(self) -> Optional[ITGlueDateTime]:
-        """Installation date."""
-        value = self.get_attribute("installed-at")
-        return ITGlueDateTime.validate(value) if value else None
-
-    @installed_at.setter
-    def installed_at(self, value: Optional[ITGlueDateTime]) -> None:
-        self.set_attribute("installed-at", value)
+    def updated_at(self) -> Optional[datetime]:
+        """Get updated timestamp."""
+        return self._parse_datetime(self.get_attribute("updated-at"))
 
     @property
-    def warranty_expires_at(self) -> Optional[ITGlueDateTime]:
-        """Warranty expiration date."""
-        value = self.get_attribute("warranty-expires-at")
-        return ITGlueDateTime.validate(value) if value else None
-
-    @warranty_expires_at.setter
-    def warranty_expires_at(self, value: Optional[ITGlueDateTime]) -> None:
-        self.set_attribute("warranty-expires-at", value)
-
-    # Timestamps
-    @property
-    def created_at(self) -> Optional[ITGlueDateTime]:
-        """Creation timestamp."""
-        value = self.get_attribute("created-at")
-        return ITGlueDateTime.validate(value) if value else None
+    def warranty_expires_at(self) -> Optional[datetime]:
+        """Get warranty expiration timestamp."""
+        return self._parse_datetime(self.get_attribute("warranty-expires-at"))
 
     @property
-    def updated_at(self) -> Optional[ITGlueDateTime]:
-        """Last update timestamp."""
-        value = self.get_attribute("updated-at")
-        return ITGlueDateTime.validate(value) if value else None
+    def installed_at(self) -> Optional[datetime]:
+        """Get installation timestamp."""
+        return self._parse_datetime(self.get_attribute("installed-at"))
+
+    @property
+    def purchased_at(self) -> Optional[datetime]:
+        """Get purchase timestamp."""
+        return self._parse_datetime(self.get_attribute("purchased-at"))
 
     # Status and type information
     @property
@@ -305,9 +288,20 @@ class ConfigurationCollection(ITGlueResourceCollection[Configuration]):
     """Collection of Configuration resources."""
 
     @classmethod
-    def from_api_dict(cls, data: dict) -> "ConfigurationCollection":
-        """Create collection from API response."""
-        return super().from_api_dict(data, Configuration)
+    def from_api_dict(
+        cls, data: Dict[str, Any], resource_class: Optional[Type[Configuration]] = None
+    ) -> "ConfigurationCollection":
+        """Create ConfigurationCollection from API response."""
+        if resource_class is None:
+            resource_class = Configuration
+        
+        base_collection = super().from_api_dict(data, resource_class)
+        return cls(
+            data=base_collection.data,
+            meta=base_collection.meta,
+            links=base_collection.links,
+            included=base_collection.included,
+        )
 
     def get_by_name(self, name: str) -> Optional[Configuration]:
         """Find configuration by name."""

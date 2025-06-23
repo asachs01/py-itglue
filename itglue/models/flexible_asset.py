@@ -6,7 +6,8 @@ by users to document any type of information not covered by standard resources.
 """
 
 from enum import Enum
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any, Dict, Union, Type
+from datetime import datetime
 
 from pydantic import Field, field_validator
 
@@ -121,16 +122,14 @@ class FlexibleAsset(ITGlueResource):
 
     # Timestamps
     @property
-    def created_at(self) -> Optional[ITGlueDateTime]:
-        """Creation timestamp."""
-        value = self.get_attribute("created-at")
-        return ITGlueDateTime.validate(value) if value else None
+    def created_at(self) -> Optional[datetime]:
+        """Get created timestamp."""
+        return self._parse_datetime(self.get_attribute("created-at"))
 
     @property
-    def updated_at(self) -> Optional[ITGlueDateTime]:
-        """Last update timestamp."""
-        value = self.get_attribute("updated-at")
-        return ITGlueDateTime.validate(value) if value else None
+    def updated_at(self) -> Optional[datetime]:
+        """Get updated timestamp."""
+        return self._parse_datetime(self.get_attribute("updated-at"))
 
     # Relationship helpers
     @property
@@ -324,9 +323,20 @@ class FlexibleAssetCollection(ITGlueResourceCollection[FlexibleAsset]):
     """Collection of Flexible Asset resources."""
 
     @classmethod
-    def from_api_dict(cls, data: dict) -> "FlexibleAssetCollection":
-        """Create collection from API response."""
-        return super().from_api_dict(data, FlexibleAsset)
+    def from_api_dict(
+        cls, data: Dict[str, Any], resource_class: Optional[Type[FlexibleAsset]] = None
+    ) -> "FlexibleAssetCollection":
+        """Create FlexibleAssetCollection from API response."""
+        if resource_class is None:
+            resource_class = FlexibleAsset
+        
+        base_collection = super().from_api_dict(data, resource_class)
+        return cls(
+            data=base_collection.data,
+            meta=base_collection.meta,
+            links=base_collection.links,
+            included=base_collection.included,
+        )
 
     def get_by_name(self, name: str) -> Optional[FlexibleAsset]:
         """Find flexible asset by name."""
@@ -370,9 +380,20 @@ class FlexibleAssetTypeCollection(ITGlueResourceCollection[FlexibleAssetType]):
     """Collection of Flexible Asset Type resources."""
 
     @classmethod
-    def from_api_dict(cls, data: dict) -> "FlexibleAssetTypeCollection":
-        """Create collection from API response."""
-        return super().from_api_dict(data, FlexibleAssetType)
+    def from_api_dict(
+        cls, data: Dict[str, Any], resource_class: Optional[Type[FlexibleAssetType]] = None
+    ) -> "FlexibleAssetTypeCollection":
+        """Create FlexibleAssetTypeCollection from API response."""
+        if resource_class is None:
+            resource_class = FlexibleAssetType
+        
+        base_collection = super().from_api_dict(data, resource_class)
+        return cls(
+            data=base_collection.data,
+            meta=base_collection.meta,
+            links=base_collection.links,
+            included=base_collection.included,
+        )
 
     def get_by_name(self, name: str) -> Optional[FlexibleAssetType]:
         """Find flexible asset type by name."""
@@ -390,9 +411,20 @@ class FlexibleAssetFieldCollection(ITGlueResourceCollection[FlexibleAssetField])
     """Collection of Flexible Asset Field resources."""
 
     @classmethod
-    def from_api_dict(cls, data: dict) -> "FlexibleAssetFieldCollection":
-        """Create collection from API response."""
-        return super().from_api_dict(data, FlexibleAssetField)
+    def from_api_dict(
+        cls, data: Dict[str, Any], resource_class: Optional[Type[FlexibleAssetField]] = None
+    ) -> "FlexibleAssetFieldCollection":
+        """Create FlexibleAssetFieldCollection from API response."""
+        if resource_class is None:
+            resource_class = FlexibleAssetField
+        
+        base_collection = super().from_api_dict(data, resource_class)
+        return cls(
+            data=base_collection.data,
+            meta=base_collection.meta,
+            links=base_collection.links,
+            included=base_collection.included,
+        )
 
     def get_by_name(self, name: str) -> Optional[FlexibleAssetField]:
         """Find field by name."""

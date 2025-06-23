@@ -6,7 +6,7 @@ organization relationships, sharing controls, and comprehensive password managem
 """
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Type
 from datetime import datetime
 
 from .base import ITGlueResource, ITGlueResourceCollection, ResourceType
@@ -339,9 +339,20 @@ class PasswordCollection(ITGlueResourceCollection[Password]):
     """
 
     @classmethod
-    def from_api_dict(cls, data: dict) -> "PasswordCollection":
-        """Create collection from API response."""
-        return super().from_api_dict(data, Password)
+    def from_api_dict(
+        cls, data: Dict[str, Any], resource_class: Optional[Type[Password]] = None
+    ) -> "PasswordCollection":
+        """Create PasswordCollection from API response."""
+        if resource_class is None:
+            resource_class = Password
+        
+        base_collection = super().from_api_dict(data, resource_class)
+        return cls(
+            data=base_collection.data,
+            meta=base_collection.meta,
+            links=base_collection.links,
+            included=base_collection.included,
+        )
 
     def find_by_name(self, name: str) -> Optional[Password]:
         """Find password by exact name match."""

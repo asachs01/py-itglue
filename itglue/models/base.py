@@ -6,7 +6,18 @@ including resource structure, relationships, links, and meta information.
 """
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union, Type, TypeVar, Generic
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Generic,
+    Union,
+    ClassVar,
+)
 from datetime import datetime
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
@@ -282,21 +293,20 @@ class ITGlueResource(BaseModel, Generic[T]):
         return self.to_api_dict()
 
 
-class ITGlueResourceCollection(BaseModel, Generic[T]):
-    """
-    Collection of ITGlue resources with pagination and metadata.
+class ITGlueResourceCollection(Generic[T]):
+    """Collection of ITGlue resources with pagination and metadata support."""
 
-    Represents a JSON API response containing multiple resources.
-    """
-
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
-
-    data: List[T] = Field(default_factory=list, description="Collection of resources")
-    links: Optional[ITGlueLinks] = Field(None, description="Collection links")
-    meta: Optional[ITGlueMeta] = Field(None, description="Collection metadata")
-    included: Optional[List[ITGlueResource]] = Field(
-        None, description="Included related resources"
-    )
+    def __init__(
+        self,
+        data: Optional[List[T]] = None,
+        meta: Optional[ITGlueMeta] = None,
+        links: Optional[ITGlueLinks] = None,
+        included: Optional[List[Dict[str, Any]]] = None,
+    ):
+        self.data: List[T] = data or []
+        self.meta = meta
+        self.links = links
+        self.included: List[Dict[str, Any]] = included or []
 
     def __len__(self) -> int:
         """Get the number of resources in the collection."""
@@ -384,32 +394,30 @@ class ITGlueResourceCollection(BaseModel, Generic[T]):
 
     @classmethod
     def from_api_dict(
-        cls, data: Dict[str, Any], resource_class: Type[T]
+        cls, data: Dict[str, Any], resource_class: Optional[Type[T]] = None
     ) -> "ITGlueResourceCollection[T]":
         """Create collection from API response dictionary."""
-        # Parse the resources
-        resources = []
-        if "data" in data:
-            for item in data["data"]:
-                resources.append(resource_class.from_api_dict(item))
+        # Extract main data
+        items_data = data.get("data", [])
+        if not isinstance(items_data, list):
+            items_data = [items_data] if items_data else []
 
-        # Parse included resources
-        included = []
-        if "included" in data:
-            for item in data["included"]:
-                included.append(ITGlueResource.from_api_dict(item))
+        # Create resource instances
+        items: List[T] = []
+        if resource_class:
+            for item_data in items_data:
+                if hasattr(resource_class, "from_api_dict"):
+                    items.append(resource_class.from_api_dict(item_data))
 
-        return cls(
-            data=resources,
-            links=(
-                ITGlueLinks.model_validate(data.get("links", {}))
-                if "links" in data
-                else None
-            ),
-            meta=(
-                ITGlueMeta.model_validate(data.get("meta", {}))
-                if "meta" in data
-                else None
-            ),
-            included=included if included else None,
-        )
+        # Extract metadata
+        meta_data = data.get("meta", {})
+        meta = ITGlueMeta(**meta_data) if meta_data else None
+
+        # Extract links
+        links_data = data.get("links", {})
+        links = ITGlueLinks(**links_data) if links_data else None
+
+        # Extract included resources
+        included: List[Dict[str, Any]] = data.get("included", [])
+
+        return cls(data=items, meta=meta, links=links, included=included)

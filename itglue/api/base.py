@@ -7,6 +7,7 @@ CRUD operations, pagination handling, error management, and response processing.
 import logging
 from typing import Dict, List, Optional, TypeVar, Generic, Union, Any, Type, Callable
 from urllib.parse import urljoin, urlencode
+import structlog
 
 from ..http_client import ITGlueHTTPClient
 from ..models.base import ITGlueResource, ITGlueResourceCollection, ResourceType
@@ -44,6 +45,7 @@ class BaseAPI(Generic[T]):
         self.model_class = model_class
         self.endpoint_path = endpoint_path
         self.base_url = f"/{endpoint_path}"
+        self.logger = structlog.get_logger().bind(component=self.__class__.__name__)
 
     def _build_url(self, resource_id: Optional[str] = None, subpath: str = "") -> str:
         """Build complete URL for API endpoint.
@@ -402,3 +404,71 @@ class BaseAPI(Generic[T]):
         return await self.list(
             page=page, per_page=per_page, filter_params=search_filters, **kwargs
         )
+
+    def get_by_id(self, resource_id: str, params: Optional[Dict[str, str]] = None) -> Optional[T]:
+        """Get a single resource by ID."""
+        endpoint = self._build_url(resource_id)
+        self.logger.info("Getting resource by ID", resource_id=resource_id)
+        
+        try:
+            response = self.client.get(endpoint, params=params or {})
+            
+            if response and "data" in response:
+                return self.model_class.from_api_dict(response["data"])
+            return None
+            
+        except Exception as e:
+            self.logger.error("Failed to get resource", resource_id=resource_id, error=str(e))
+            raise
+
+    def get_all(self, params: Optional[Dict[str, str]] = None, **kwargs) -> List[T]:
+        """Get all resources with pagination."""
+        endpoint = self._build_url()
+        self.logger.info("Getting all resources", params=params)
+        
+        try:
+            response = self.client.get(endpoint, params=params or {})
+            
+            if response and "data" in response:
+                all_data = response["data"]
+                if isinstance(all_data, list):
+                    return [self.model_class.from_api_dict(item) for item in all_data]
+                else:
+                    return [self.model_class.from_api_dict(all_data)]
+            return []
+            
+        except Exception as e:
+            self.logger.error("Failed to get all resources", error=str(e))
+            raise
+
+    def create(self, data: Dict[str, Any], params: Optional[Dict[str, str]] = None) -> Optional[T]:
+        """Create a new resource."""
+        endpoint = self._build_url()
+        self.logger.info("Creating resource", data=data)
+        
+        try:
+            response = self.client.post(endpoint, data=data, params=params or {})
+            
+            if response and "data" in response:
+                return self.model_class.from_api_dict(response["data"])
+            return None
+            
+        except Exception as e:
+            self.logger.error("Failed to create resource", error=str(e))
+            raise
+
+    def update(self, resource_id: str, data: Dict[str, Any], params: Optional[Dict[str, str]] = None) -> Optional[T]:
+        """Update an existing resource."""
+        endpoint = self._build_url(resource_id)
+        self.logger.info("Updating resource", resource_id=resource_id, data=data)
+        
+        try:
+            response = self.client.patch(endpoint, data=data, params=params or {})
+            
+            if response and "data" in response:
+                return self.model_class.from_api_dict(response["data"])
+            return None
+            
+        except Exception as e:
+            self.logger.error("Failed to update resource", resource_id=resource_id, error=str(e))
+            raise
