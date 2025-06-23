@@ -295,44 +295,45 @@ class TestCacheManager:
 
         assert manager.backend is None
 
-    @patch("redis.from_url")
-    def test_cache_manager_redis_backend(self, mock_redis_from_url, config_redis):
+    def test_cache_manager_redis_backend(self, config_redis):
         """Test cache manager with Redis backend."""
-        pytest.importorskip("redis")
-        mock_redis_client = Mock()
-        mock_redis_from_url.return_value = mock_redis_client
+        redis = pytest.importorskip("redis")
+        
+        with patch.object(redis, "from_url") as mock_redis_from_url:
+            mock_redis_client = Mock()
+            mock_redis_from_url.return_value = mock_redis_client
 
-        manager = CacheManager(config_redis)
+            manager = CacheManager(config_redis)
 
-        assert manager.backend is not None
-        assert isinstance(manager.backend, RedisCache)
-        mock_redis_from_url.assert_called_once_with("redis://localhost:6379")
+            assert manager.backend is not None
+            assert isinstance(manager.backend, RedisCache)
+            mock_redis_from_url.assert_called_once_with("redis://localhost:6379")
 
-    @patch("redis.from_url")
-    def test_cache_manager_redis_import_error(self, mock_redis_from_url, config_redis):
+    def test_cache_manager_redis_import_error(self, config_redis):
         """Test fallback to memory cache when Redis import fails."""
-        pytest.importorskip("redis")
-        mock_redis_from_url.side_effect = ImportError("Redis not available")
+        redis = pytest.importorskip("redis")
+        
+        with patch.object(redis, "from_url") as mock_redis_from_url:
+            mock_redis_from_url.side_effect = ImportError("Redis not available")
 
-        manager = CacheManager(config_redis)
+            manager = CacheManager(config_redis)
 
-        # Should fallback to memory cache
-        assert manager.backend is not None
-        assert isinstance(manager.backend, MemoryCache)
+            # Should fallback to memory cache
+            assert manager.backend is not None
+            assert isinstance(manager.backend, MemoryCache)
 
-    @patch("redis.from_url")
-    def test_cache_manager_redis_connection_error(
-        self, mock_redis_from_url, config_redis
-    ):
+    def test_cache_manager_redis_connection_error(self, config_redis):
         """Test fallback to memory cache when Redis connection fails."""
-        pytest.importorskip("redis")
-        mock_redis_from_url.side_effect = Exception("Connection failed")
+        redis = pytest.importorskip("redis")
+        
+        with patch.object(redis, "from_url") as mock_redis_from_url:
+            mock_redis_from_url.side_effect = Exception("Connection failed")
 
-        manager = CacheManager(config_redis)
+            manager = CacheManager(config_redis)
 
-        # Should fallback to memory cache
-        assert manager.backend is not None
-        assert isinstance(manager.backend, MemoryCache)
+            # Should fallback to memory cache
+            assert manager.backend is not None
+            assert isinstance(manager.backend, MemoryCache)
 
     def test_generate_cache_key(self, config_memory):
         """Test cache key generation."""

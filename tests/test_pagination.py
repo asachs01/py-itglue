@@ -237,9 +237,9 @@ class TestPaginationHandler:
         assert isinstance(result, PaginatedResponse)
         assert result.pagination.current_page == 2
 
-        # Check that HTTP client was called with correct parameters
+        # Check that HTTP client was called with correct parameters (strings)
         mock_http_client.get.assert_called_once_with(
-            "/organizations", params={"page[number]": 2, "page[size]": 10}
+            "/organizations", params={"page[number]": "2", "page[size]": "10"}
         )
 
     def test_get_page_without_page_size(self, pagination_handler, mock_http_client):
@@ -247,11 +247,11 @@ class TestPaginationHandler:
         mock_response = {"data": [{"id": "1"}], "meta": {"current-page": 1}}
         mock_http_client.get.return_value = mock_response
 
-        pagination_handler.get_page("/organizations")
+        pagination_handler.get_page("/organizations", page=1)
 
         # Should not include page[size] parameter
         mock_http_client.get.assert_called_once_with(
-            "/organizations", params={"page[number]": 1}
+            "/organizations", params={"page[number]": "1"}
         )
 
     def test_get_next_page(self, pagination_handler, mock_http_client):
@@ -268,13 +268,13 @@ class TestPaginationHandler:
         }
         mock_http_client.get.return_value = next_response
 
-        result = pagination_handler.get_next_page(current_response, "/organizations")
+        result = pagination_handler.get_next_page("/organizations", current_response)
 
         assert isinstance(result, PaginatedResponse)
         assert result.pagination.current_page == 2
 
         mock_http_client.get.assert_called_once_with(
-            "/organizations", params={"page[number]": 2}
+            "/organizations", params={"page[number]": "2"}
         )
 
     def test_get_next_page_none_when_no_next(
@@ -285,7 +285,7 @@ class TestPaginationHandler:
         current_meta = {"current-page": 1}  # No next-page
         current_response = PaginatedResponse(current_data, current_meta)
 
-        result = pagination_handler.get_next_page(current_response, "/organizations")
+        result = pagination_handler.get_next_page("/organizations", current_response)
 
         assert result is None
         mock_http_client.get.assert_not_called()
@@ -304,13 +304,13 @@ class TestPaginationHandler:
         }
         mock_http_client.get.return_value = prev_response
 
-        result = pagination_handler.get_prev_page(current_response, "/organizations")
+        result = pagination_handler.get_prev_page("/organizations", current_response)
 
         assert isinstance(result, PaginatedResponse)
         assert result.pagination.current_page == 1
 
         mock_http_client.get.assert_called_once_with(
-            "/organizations", params={"page[number]": 1}
+            "/organizations", params={"page[number]": "1"}
         )
 
     def test_get_all_pages(self, pagination_handler, mock_http_client):

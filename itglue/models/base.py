@@ -232,6 +232,37 @@ class ITGlueResource(BaseModel, Generic[T]):
         """Set an attribute value."""
         self.attributes[name] = value
 
+    def _parse_datetime(self, value: Any) -> Optional[datetime]:
+        """Parse datetime string into datetime object."""
+        if not value:
+            return None
+        
+        if isinstance(value, datetime):
+            return value
+            
+        if isinstance(value, str):
+            try:
+                # Handle ISO format with microseconds and timezone
+                if value.endswith('Z'):
+                    value = value[:-1] + '+00:00'
+                return datetime.fromisoformat(value)
+            except ValueError:
+                # Try common datetime formats
+                from datetime import datetime as dt
+                formats = [
+                    "%Y-%m-%dT%H:%M:%S.%f%z",
+                    "%Y-%m-%dT%H:%M:%S%z",
+                    "%Y-%m-%d %H:%M:%S",
+                    "%Y-%m-%d",
+                ]
+                for fmt in formats:
+                    try:
+                        return dt.strptime(value, fmt)
+                    except ValueError:
+                        continue
+                
+        return None
+
     def get_relationship(self, name: str) -> Optional[ITGlueRelationship]:
         """Get a relationship by name."""
         if not self.relationships:

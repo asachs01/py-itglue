@@ -303,7 +303,8 @@ class TestAPIOperations:
         mock_http_client.post = Mock(return_value=response_data)
 
         with patch.object(test_api, "_process_response") as mock_process:
-            mock_resource = MockTestResource(id="123")
+            # Create mock resource with the expected attributes
+            mock_resource = MockTestResource(id="123", attributes={"name": "New Org"})
             mock_process.return_value = mock_resource
 
             data = {"name": "New Org"}
@@ -327,7 +328,8 @@ class TestAPIOperations:
         mock_http_client.patch = Mock(return_value=response_data)
 
         with patch.object(test_api, "_process_response") as mock_process:
-            mock_resource = MockTestResource(id="123")
+            # Create mock resource with the expected attributes
+            mock_resource = MockTestResource(id="123", attributes={"name": "Updated Org"})
             mock_process.return_value = mock_resource
 
             data = {"name": "Updated Org"}
