@@ -8,7 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **CI/CD Infrastructure** (2025-06-23)
+- Future features will be documented here
+
+## [0.2.1] - 2025-01-26
+
+### Fixed
+- Code formatting compliance with Black formatter standards
+- GitHub Actions CI/CD workflow formatting checks now pass
+- Standardized Python code style across all 45+ files
+
+### Changed
+- Applied Black formatting to entire codebase for consistency
+- No functional changes, only code style improvements
+
+### Added
+- **CI/CD Infrastructure** (v0.2.0 - 2025-06-23)
   - Comprehensive GitHub Actions workflows for automated testing and deployment
   - Multi-platform CI testing (Ubuntu, Windows, macOS) across Python 3.10-3.12
   - Automated PyPI releases triggered by git tags with version validation
