@@ -1,7 +1,7 @@
 """Tests for the Configurations API resource class."""
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 from typing import Dict, Any
 
 from itglue.api.configurations import ConfigurationsAPI
@@ -64,20 +64,19 @@ class TestConfigurationsAPIInitialization:
         assert api.base_url == "/configurations"
 
 
-@pytest.mark.asyncio
 class TestConfigurationsAPISpecializedMethods:
     """Test specialized methods for configurations."""
 
-    async def test_get_by_organization(self, configurations_api, mock_http_client):
+    def test_get_by_organization(self, configurations_api, mock_http_client):
         """Test getting configurations by organization ID."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
-            result = await configurations_api.list_by_organization("456")
+            result = configurations_api.list_by_organization("456")
 
             assert result == mock_collection
             expected_params = {"filter[organization-id]": "456"}
@@ -85,16 +84,16 @@ class TestConfigurationsAPISpecializedMethods:
                 "/configurations", params=expected_params
             )
 
-    async def test_search_by_hostname(self, configurations_api, mock_http_client):
+    def test_search_by_hostname(self, configurations_api, mock_http_client):
         """Test searching configurations by hostname."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
-            result = await configurations_api.search_by_hostname("server.example.com")
+            result = configurations_api.search_by_hostname("server.example.com")
 
             assert result == mock_collection
             expected_params = {"filter[hostname]": "server.example.com"}
@@ -102,16 +101,16 @@ class TestConfigurationsAPISpecializedMethods:
                 "/configurations", params=expected_params
             )
 
-    async def test_search_by_ip(self, configurations_api, mock_http_client):
+    def test_search_by_ip(self, configurations_api, mock_http_client):
         """Test searching configurations by IP address."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
-            result = await configurations_api.search_by_ip_address("192.168.1.100")
+            result = configurations_api.search_by_ip_address("192.168.1.100")
 
             assert result == mock_collection
             expected_params = {"filter[primary-ip]": "192.168.1.100"}
@@ -119,16 +118,16 @@ class TestConfigurationsAPISpecializedMethods:
                 "/configurations", params=expected_params
             )
 
-    async def test_list_by_status(self, configurations_api, mock_http_client):
+    def test_list_by_status(self, configurations_api, mock_http_client):
         """Test listing configurations by status."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
-            result = await configurations_api.list_by_status(ConfigurationStatus.ACTIVE)
+            result = configurations_api.list_by_status(ConfigurationStatus.ACTIVE)
 
             assert result == mock_collection
             expected_params = {"filter[configuration-status-name]": "Active"}
@@ -136,16 +135,16 @@ class TestConfigurationsAPISpecializedMethods:
                 "/configurations", params=expected_params
             )
 
-    async def test_list_by_status_string(self, configurations_api, mock_http_client):
+    def test_list_by_status_string(self, configurations_api, mock_http_client):
         """Test listing configurations by status using string."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
-            result = await configurations_api.list_by_status("Active")
+            result = configurations_api.list_by_status("Active")
 
             assert result == mock_collection
             expected_params = {"filter[configuration-status-name]": "Active"}
@@ -153,16 +152,16 @@ class TestConfigurationsAPISpecializedMethods:
                 "/configurations", params=expected_params
             )
 
-    async def test_list_by_type(self, configurations_api, mock_http_client):
+    def test_list_by_type(self, configurations_api, mock_http_client):
         """Test listing configurations by type."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
-            result = await configurations_api.list_by_type("123")
+            result = configurations_api.list_by_type("123")
 
             assert result == mock_collection
             expected_params = {"filter[configuration-type-id]": "123"}
@@ -170,17 +169,17 @@ class TestConfigurationsAPISpecializedMethods:
                 "/configurations", params=expected_params
             )
 
-    async def test_get_organization_servers(self, configurations_api, mock_http_client):
+    def test_get_organization_servers(self, configurations_api, mock_http_client):
         """Test getting server configurations for an organization using list with filters."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
             # Use list method with multiple filters instead of a specialized method
-            result = await configurations_api.list(
+            result = configurations_api.list(
                 filter_params={"organization-id": "456", "configuration-type-id": "789"}
             )
 
@@ -193,59 +192,59 @@ class TestConfigurationsAPISpecializedMethods:
                 "/configurations", params=expected_params
             )
 
-    async def test_update_status_with_enum(
+    def test_update_status_with_enum(
         self, configurations_api, mock_http_client, sample_configuration_data
     ):
         """Test updating configuration status with enum."""
         response_data = {"data": sample_configuration_data}
-        mock_http_client.patch = AsyncMock(return_value=response_data)
+        mock_http_client.patch = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_config = Configuration.from_api_dict(sample_configuration_data)
             mock_process.return_value = mock_config
 
-            result = await configurations_api.update_status(
+            result = configurations_api.update_status(
                 "123", ConfigurationStatus.INACTIVE
             )
 
             assert result == mock_config
             mock_http_client.patch.assert_called_once()
 
-    async def test_update_status_invalid(self, configurations_api):
+    def test_update_status_invalid(self, configurations_api):
         """Test updating configuration status with invalid value."""
         with pytest.raises(ITGlueValidationError, match="Invalid configuration status"):
-            await configurations_api.update_status("123", "InvalidStatus")
+            configurations_api.update_status("123", "InvalidStatus")
 
-    async def test_create_configuration_basic(
+    def test_create_configuration_basic(
         self, configurations_api, mock_http_client, sample_configuration_data
     ):
         """Test creating a basic configuration."""
         response_data = {"data": sample_configuration_data}
-        mock_http_client.post = AsyncMock(return_value=response_data)
+        mock_http_client.post = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_config = Configuration.from_api_dict(sample_configuration_data)
             mock_process.return_value = mock_config
 
-            result = await configurations_api.create_configuration(
+            result = configurations_api.create_configuration(
                 organization_id="456", name="Test Server", configuration_type_id="789"
             )
 
             assert result == mock_config
             mock_http_client.post.assert_called_once()
 
-    async def test_create_configuration_full(
+    def test_create_configuration_full(
         self, configurations_api, mock_http_client, sample_configuration_data
     ):
         """Test creating a configuration with all fields."""
         response_data = {"data": sample_configuration_data}
-        mock_http_client.post = AsyncMock(return_value=response_data)
+        mock_http_client.post = Mock(return_value=response_data)
 
         with patch.object(configurations_api, "_process_response") as mock_process:
             mock_config = Configuration.from_api_dict(sample_configuration_data)
             mock_process.return_value = mock_config
 
-            result = await configurations_api.create_configuration(
+            result = configurations_api.create_configuration(
                 organization_id="456",
                 name="Test Server",
                 configuration_type_id="789",

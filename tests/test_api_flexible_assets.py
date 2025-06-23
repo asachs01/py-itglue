@@ -6,7 +6,7 @@ classes and their methods.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import Mock, MagicMock
 from typing import Dict, Any
 
 from itglue.api.flexible_assets import (
@@ -26,7 +26,7 @@ from itglue.models.flexible_asset import (
 from itglue.exceptions import ITGlueValidationError
 
 
-@pytest.mark.asyncio
+
 class TestFlexibleAssetsAPI:
     """Test FlexibleAssetsAPI class."""
 
@@ -34,10 +34,10 @@ class TestFlexibleAssetsAPI:
     def mock_http_client(self):
         """Create mock HTTP client."""
         client = MagicMock()
-        client.get = AsyncMock()
-        client.post = AsyncMock()
-        client.patch = AsyncMock()
-        client.delete = AsyncMock()
+        client.get = Mock()
+        client.post = Mock()
+        client.patch = Mock()
+        client.delete = Mock()
         return client
 
     @pytest.fixture
@@ -89,13 +89,13 @@ class TestFlexibleAssetsAPI:
             "meta": {"total-count": 2},
         }
 
-    async def test_get_by_organization(
+    def test_get_by_organization(
         self, flexible_assets_api, mock_http_client, sample_collection_data
     ):
         """Test getting flexible assets by organization."""
         mock_http_client.get.return_value = sample_collection_data
 
-        result = await flexible_assets_api.get_by_organization(
+        result = flexible_assets_api.get_by_organization(
             organization_id="456",
             page=1,
             per_page=25,
@@ -116,13 +116,13 @@ class TestFlexibleAssetsAPI:
         assert isinstance(result, FlexibleAssetCollection)
         assert len(result) == 2
 
-    async def test_get_by_type(
+    def test_get_by_type(
         self, flexible_assets_api, mock_http_client, sample_collection_data
     ):
         """Test getting flexible assets by type."""
         mock_http_client.get.return_value = sample_collection_data
 
-        result = await flexible_assets_api.get_by_type(
+        result = flexible_assets_api.get_by_type(
             flexible_asset_type_id="789", organization_id="456"
         )
 
@@ -139,14 +139,14 @@ class TestFlexibleAssetsAPI:
 
         assert isinstance(result, FlexibleAssetCollection)
 
-    async def test_search_by_name(
+    def test_search_by_name(
         self, flexible_assets_api, mock_http_client, sample_collection_data
     ):
         """Test searching flexible assets by name."""
         mock_http_client.get.return_value = sample_collection_data
 
         # Test partial match
-        await flexible_assets_api.search_by_name("Web Server", organization_id="456")
+        flexible_assets_api.search_by_name("Web Server", organization_id="456")
 
         expected_params = {
             "filter[name]": "*Web Server*",
@@ -158,7 +158,7 @@ class TestFlexibleAssetsAPI:
         )
 
         # Test exact match
-        await flexible_assets_api.search_by_name("Web Server", exact_match=True)
+        flexible_assets_api.search_by_name("Web Server", exact_match=True)
 
         expected_params = {"filter[name]": "Web Server"}
 
@@ -166,14 +166,14 @@ class TestFlexibleAssetsAPI:
             "/flexible_assets", params=expected_params
         )
 
-    async def test_search_by_trait(
+    def test_search_by_trait(
         self, flexible_assets_api, mock_http_client, sample_collection_data
     ):
         """Test searching flexible assets by trait."""
         mock_http_client.get.return_value = sample_collection_data
 
         # Test with value
-        await flexible_assets_api.search_by_trait(
+        flexible_assets_api.search_by_trait(
             trait_name="environment", trait_value="production", organization_id="456"
         )
 
@@ -187,7 +187,7 @@ class TestFlexibleAssetsAPI:
         )
 
         # Test without value (existence check)
-        await flexible_assets_api.search_by_trait(trait_name="hostname")
+        flexible_assets_api.search_by_trait(trait_name="hostname")
 
         expected_params = {"filter[traits][hostname]": "*"}
 
@@ -195,13 +195,13 @@ class TestFlexibleAssetsAPI:
             "/flexible_assets", params=expected_params
         )
 
-    async def test_search_by_tag(
+    def test_search_by_tag(
         self, flexible_assets_api, mock_http_client, sample_collection_data
     ):
         """Test searching flexible assets by tag."""
         mock_http_client.get.return_value = sample_collection_data
 
-        await flexible_assets_api.search_by_tag("production", organization_id="456")
+        flexible_assets_api.search_by_tag("production", organization_id="456")
 
         expected_params = {
             "filter[tag_list]": "production",
@@ -212,14 +212,14 @@ class TestFlexibleAssetsAPI:
             "/flexible_assets", params=expected_params
         )
 
-    async def test_list_by_status(
+    def test_list_by_status(
         self, flexible_assets_api, mock_http_client, sample_collection_data
     ):
         """Test listing flexible assets by status."""
         mock_http_client.get.return_value = sample_collection_data
 
         # Test with enum
-        await flexible_assets_api.list_by_status(
+        flexible_assets_api.list_by_status(
             FlexibleAssetStatus.ACTIVE, organization_id="456"
         )
 
@@ -235,7 +235,7 @@ class TestFlexibleAssetsAPI:
         )
 
         # Test with string
-        await flexible_assets_api.list_by_status("Archived")
+        flexible_assets_api.list_by_status("Archived")
 
         expected_params = {
             "filter[status]": "Archived",
@@ -247,13 +247,13 @@ class TestFlexibleAssetsAPI:
             "/flexible_assets", params=expected_params
         )
 
-    async def test_get_active_assets(
+    def test_get_active_assets(
         self, flexible_assets_api, mock_http_client, sample_collection_data
     ):
         """Test getting active flexible assets."""
         mock_http_client.get.return_value = sample_collection_data
 
-        result = await flexible_assets_api.get_active_assets(organization_id="456")
+        result = flexible_assets_api.get_active_assets(organization_id="456")
 
         expected_params = {
             "filter[status]": "Active",
@@ -267,7 +267,7 @@ class TestFlexibleAssetsAPI:
         )
         assert isinstance(result, FlexibleAssetCollection)
 
-    async def test_create_flexible_asset(
+    def test_create_flexible_asset(
         self, flexible_assets_api, mock_http_client, sample_asset_data
     ):
         """Test creating a flexible asset."""
@@ -276,7 +276,7 @@ class TestFlexibleAssetsAPI:
         traits = {"hostname": "web01", "ip_address": "192.168.1.100"}
         tags = ["production", "web"]
 
-        result = await flexible_assets_api.create_flexible_asset(
+        result = flexible_assets_api.create_flexible_asset(
             organization_id="456",
             flexible_asset_type_id="789",
             name="Web Server",
@@ -303,23 +303,23 @@ class TestFlexibleAssetsAPI:
         assert isinstance(result, FlexibleAsset)
         assert result.name == "Web Server"
 
-    async def test_create_flexible_asset_validation(self, flexible_assets_api):
+    def test_create_flexible_asset_validation(self, flexible_assets_api):
         """Test flexible asset creation validation."""
         with pytest.raises(ITGlueValidationError, match="Name is required"):
-            await flexible_assets_api.create_flexible_asset(
+            flexible_assets_api.create_flexible_asset(
                 organization_id="456",
                 flexible_asset_type_id="789",
                 name="",  # Empty name should fail
             )
 
         with pytest.raises(ITGlueValidationError, match="Name is required"):
-            await flexible_assets_api.create_flexible_asset(
+            flexible_assets_api.create_flexible_asset(
                 organization_id="456",
                 flexible_asset_type_id="789",
                 name="   ",  # Whitespace only should fail
             )
 
-    async def test_update_traits(
+    def test_update_traits(
         self, flexible_assets_api, mock_http_client, sample_asset_data
     ):
         """Test updating flexible asset traits."""
@@ -339,7 +339,7 @@ class TestFlexibleAssetsAPI:
 
         new_traits = {"environment": "production", "cpu_cores": "8"}
 
-        result = await flexible_assets_api.update_traits(
+        result = flexible_assets_api.update_traits(
             flexible_asset_id="123", traits=new_traits, merge=True
         )
 
@@ -361,7 +361,7 @@ class TestFlexibleAssetsAPI:
         )
         assert isinstance(result, FlexibleAsset)
 
-    async def test_add_tags(
+    def test_add_tags(
         self, flexible_assets_api, mock_http_client, sample_asset_data
     ):
         """Test adding tags to flexible asset."""
@@ -376,7 +376,7 @@ class TestFlexibleAssetsAPI:
         mock_http_client.get.return_value = current_asset_data
         mock_http_client.patch.return_value = sample_asset_data
 
-        result = await flexible_assets_api.add_tags("123", ["web", "critical"])
+        result = flexible_assets_api.add_tags("123", ["web", "critical"])
 
         expected_data = {
             "data": {
@@ -390,7 +390,7 @@ class TestFlexibleAssetsAPI:
         )
         assert isinstance(result, FlexibleAsset)
 
-    async def test_remove_tags(
+    def test_remove_tags(
         self, flexible_assets_api, mock_http_client, sample_asset_data
     ):
         """Test removing tags from flexible asset."""
@@ -408,7 +408,7 @@ class TestFlexibleAssetsAPI:
         mock_http_client.get.return_value = current_asset_data
         mock_http_client.patch.return_value = sample_asset_data
 
-        result = await flexible_assets_api.remove_tags("123", ["critical"])
+        result = flexible_assets_api.remove_tags("123", ["critical"])
 
         expected_data = {
             "data": {
@@ -422,14 +422,14 @@ class TestFlexibleAssetsAPI:
         )
         assert isinstance(result, FlexibleAsset)
 
-    async def test_update_status(
+    def test_update_status(
         self, flexible_assets_api, mock_http_client, sample_asset_data
     ):
         """Test updating flexible asset status."""
         mock_http_client.patch.return_value = sample_asset_data
 
         # Test with enum
-        result = await flexible_assets_api.update_status(
+        result = flexible_assets_api.update_status(
             "123", FlexibleAssetStatus.ARCHIVED
         )
 
@@ -442,7 +442,7 @@ class TestFlexibleAssetsAPI:
         )
         assert isinstance(result, FlexibleAsset)
 
-    async def test_get_asset_statistics(self, flexible_assets_api, mock_http_client):
+    def test_get_asset_statistics(self, flexible_assets_api, mock_http_client):
         """Test getting asset statistics."""
         # Mock multiple API calls for different statuses
         active_response = {"data": [], "meta": {"total-count": 50}}
@@ -455,7 +455,7 @@ class TestFlexibleAssetsAPI:
             archived_response,
         ]
 
-        result = await flexible_assets_api.get_asset_statistics(organization_id="456")
+        result = flexible_assets_api.get_asset_statistics(organization_id="456")
 
         assert result["total_count"] == 65
         assert result["active_count"] == 50
@@ -467,7 +467,7 @@ class TestFlexibleAssetsAPI:
         assert mock_http_client.get.call_count == 3
 
 
-@pytest.mark.asyncio
+
 class TestFlexibleAssetTypesAPI:
     """Test FlexibleAssetTypesAPI class."""
 
@@ -475,7 +475,7 @@ class TestFlexibleAssetTypesAPI:
     def mock_http_client(self):
         """Create mock HTTP client."""
         client = MagicMock()
-        client.get = AsyncMock()
+        client.get = Mock()
         return client
 
     @pytest.fixture
@@ -509,13 +509,13 @@ class TestFlexibleAssetTypesAPI:
             ]
         }
 
-    async def test_get_enabled_types(
+    def test_get_enabled_types(
         self, flexible_asset_types_api, mock_http_client, sample_types_data
     ):
         """Test getting enabled asset types."""
         mock_http_client.get.return_value = sample_types_data
 
-        result = await flexible_asset_types_api.get_enabled_types()
+        result = flexible_asset_types_api.get_enabled_types()
 
         expected_params = {"filter[enabled]": "true"}
 
@@ -525,13 +525,13 @@ class TestFlexibleAssetTypesAPI:
 
         assert isinstance(result, FlexibleAssetTypeCollection)
 
-    async def test_get_builtin_types(
+    def test_get_builtin_types(
         self, flexible_asset_types_api, mock_http_client, sample_types_data
     ):
         """Test getting builtin asset types."""
         mock_http_client.get.return_value = sample_types_data
 
-        result = await flexible_asset_types_api.get_builtin_types()
+        result = flexible_asset_types_api.get_builtin_types()
 
         expected_params = {"filter[builtin]": "true"}
 
@@ -541,14 +541,14 @@ class TestFlexibleAssetTypesAPI:
 
         assert isinstance(result, FlexibleAssetTypeCollection)
 
-    async def test_search_by_name(
+    def test_search_by_name(
         self, flexible_asset_types_api, mock_http_client, sample_types_data
     ):
         """Test searching asset types by name."""
         mock_http_client.get.return_value = sample_types_data
 
         # Test partial match
-        await flexible_asset_types_api.search_by_name("Server")
+        flexible_asset_types_api.search_by_name("Server")
 
         expected_params = {"filter[name]": "*Server*"}
         mock_http_client.get.assert_called_with(
@@ -556,14 +556,14 @@ class TestFlexibleAssetTypesAPI:
         )
 
         # Test exact match
-        await flexible_asset_types_api.search_by_name("Servers", exact_match=True)
+        flexible_asset_types_api.search_by_name("Servers", exact_match=True)
 
         expected_params = {"filter[name]": "Servers"}
         mock_http_client.get.assert_called_with(
             "/flexible_asset_types", params=expected_params
         )
 
-    async def test_get_fields(self, flexible_asset_types_api, mock_http_client):
+    def test_get_fields(self, flexible_asset_types_api, mock_http_client):
         """Test getting fields for asset type."""
         fields_data = {
             "data": [
@@ -580,7 +580,7 @@ class TestFlexibleAssetTypesAPI:
         }
         mock_http_client.get.return_value = fields_data
 
-        result = await flexible_asset_types_api.get_fields("123")
+        result = flexible_asset_types_api.get_fields("123")
 
         expected_url = "/flexible_asset_types/123/relationships/flexible_asset_fields"
 
@@ -588,7 +588,7 @@ class TestFlexibleAssetTypesAPI:
         assert isinstance(result, FlexibleAssetFieldCollection)
 
 
-@pytest.mark.asyncio
+
 class TestFlexibleAssetFieldsAPI:
     """Test FlexibleAssetFieldsAPI class."""
 
@@ -596,7 +596,7 @@ class TestFlexibleAssetFieldsAPI:
     def mock_http_client(self):
         """Create mock HTTP client."""
         client = MagicMock()
-        client.get = AsyncMock()
+        client.get = Mock()
         return client
 
     @pytest.fixture
@@ -630,13 +630,13 @@ class TestFlexibleAssetFieldsAPI:
             ]
         }
 
-    async def test_get_by_type(
+    def test_get_by_type(
         self, flexible_asset_fields_api, mock_http_client, sample_fields_data
     ):
         """Test getting fields by asset type."""
         mock_http_client.get.return_value = sample_fields_data
 
-        result = await flexible_asset_fields_api.get_by_type("123")
+        result = flexible_asset_fields_api.get_by_type("123")
 
         expected_params = {"filter[flexible_asset_type_id]": "123"}
 
@@ -646,13 +646,13 @@ class TestFlexibleAssetFieldsAPI:
 
         assert isinstance(result, FlexibleAssetFieldCollection)
 
-    async def test_get_required_fields(
+    def test_get_required_fields(
         self, flexible_asset_fields_api, mock_http_client, sample_fields_data
     ):
         """Test getting required fields."""
         mock_http_client.get.return_value = sample_fields_data
 
-        result = await flexible_asset_fields_api.get_required_fields("123")
+        result = flexible_asset_fields_api.get_required_fields("123")
 
         expected_params = {
             "filter[flexible_asset_type_id]": "123",
@@ -665,14 +665,14 @@ class TestFlexibleAssetFieldsAPI:
 
         assert isinstance(result, FlexibleAssetFieldCollection)
 
-    async def test_get_by_kind(
+    def test_get_by_kind(
         self, flexible_asset_fields_api, mock_http_client, sample_fields_data
     ):
         """Test getting fields by kind."""
         mock_http_client.get.return_value = sample_fields_data
 
         # Test without asset type filter
-        await flexible_asset_fields_api.get_by_kind("Text")
+        flexible_asset_fields_api.get_by_kind("Text")
 
         expected_params = {"filter[kind]": "Text"}
         mock_http_client.get.assert_called_with(
@@ -680,7 +680,7 @@ class TestFlexibleAssetFieldsAPI:
         )
 
         # Test with asset type filter
-        await flexible_asset_fields_api.get_by_kind(
+        flexible_asset_fields_api.get_by_kind(
             "Number", flexible_asset_type_id="123"
         )
 

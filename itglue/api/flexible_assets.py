@@ -39,7 +39,7 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
     # Specialized flexible asset methods
 
-    async def get_by_organization(
+    def get_by_organization(
         self,
         organization_id: Union[str, int],
         page: int = 1,
@@ -67,10 +67,10 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         if include:
             params["include"] = ",".join(include)
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetCollection.from_api_dict(response)
 
-    async def get_by_type(
+    def get_by_type(
         self,
         flexible_asset_type_id: Union[str, int],
         organization_id: Optional[Union[str, int]] = None,
@@ -98,10 +98,10 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         if organization_id:
             params["filter[organization_id]"] = str(organization_id)
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetCollection.from_api_dict(response)
 
-    async def search_by_name(
+    def search_by_name(
         self,
         name: str,
         organization_id: Optional[Union[str, int]] = None,
@@ -126,10 +126,10 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         if organization_id:
             params["filter[organization_id]"] = str(organization_id)
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetCollection.from_api_dict(response)
 
-    async def search_by_trait(
+    def search_by_trait(
         self,
         trait_name: str,
         trait_value: Optional[str] = None,
@@ -154,10 +154,10 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         if organization_id:
             params["filter[organization_id]"] = str(organization_id)
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetCollection.from_api_dict(response)
 
-    async def search_by_tag(
+    def search_by_tag(
         self, tag: str, organization_id: Optional[Union[str, int]] = None
     ) -> FlexibleAssetCollection:
         """
@@ -175,10 +175,10 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         if organization_id:
             params["filter[organization_id]"] = str(organization_id)
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetCollection.from_api_dict(response)
 
-    async def list_by_status(
+    def list_by_status(
         self,
         status: Union[FlexibleAssetStatus, str],
         organization_id: Optional[Union[str, int]] = None,
@@ -210,10 +210,10 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         if organization_id:
             params["filter[organization_id]"] = str(organization_id)
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetCollection.from_api_dict(response)
 
-    async def get_active_assets(
+    def get_active_assets(
         self,
         organization_id: Optional[Union[str, int]] = None,
         page: int = 1,
@@ -230,14 +230,14 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         Returns:
             Collection of active flexible assets
         """
-        return await self.list_by_status(
+        return self.list_by_status(
             FlexibleAssetStatus.ACTIVE,
             organization_id=organization_id,
             page=page,
             per_page=per_page,
         )
 
-    async def create_flexible_asset(
+    def create_flexible_asset(
         self,
         organization_id: Union[str, int],
         flexible_asset_type_id: Union[str, int],
@@ -282,10 +282,10 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         if tags:
             data["attributes"]["tag_list"] = tags
 
-        response = await self.client.post(self._build_url(), {"data": data})
+        response = self.client.post(self._build_url(), {"data": data})
         return FlexibleAsset.from_api_dict(response["data"])
 
-    async def update_traits(
+    def update_traits(
         self,
         flexible_asset_id: Union[str, int],
         traits: Dict[str, Any],
@@ -304,7 +304,7 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         """
         if merge:
             # Get current asset to merge traits
-            current_asset = await self.get(flexible_asset_id)
+            current_asset = self.get(flexible_asset_id)
             current_traits = current_asset.traits or {}
             updated_traits = {**current_traits, **traits}
         else:
@@ -312,12 +312,12 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
         data = {"type": "flexible_assets", "attributes": {"traits": updated_traits}}
 
-        response = await self.client.patch(
+        response = self.client.patch(
             self._build_url(flexible_asset_id), {"data": data}
         )
         return FlexibleAsset.from_api_dict(response["data"])
 
-    async def add_tags(
+    def add_tags(
         self, flexible_asset_id: Union[str, int], tags: List[str]
     ) -> FlexibleAsset:
         """
@@ -330,7 +330,7 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         Returns:
             Updated flexible asset
         """
-        current_asset = await self.get(flexible_asset_id)
+        current_asset = self.get(flexible_asset_id)
         current_tags = current_asset.tag_list or []
 
         # Add new tags, avoiding duplicates
@@ -341,12 +341,12 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
         data = {"type": "flexible_assets", "attributes": {"tag_list": updated_tags}}
 
-        response = await self.client.patch(
+        response = self.client.patch(
             self._build_url(flexible_asset_id), {"data": data}
         )
         return FlexibleAsset.from_api_dict(response["data"])
 
-    async def remove_tags(
+    def remove_tags(
         self, flexible_asset_id: Union[str, int], tags: List[str]
     ) -> FlexibleAsset:
         """
@@ -359,7 +359,7 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
         Returns:
             Updated flexible asset
         """
-        current_asset = await self.get(flexible_asset_id)
+        current_asset = self.get(flexible_asset_id)
         current_tags = current_asset.tag_list or []
 
         # Remove specified tags
@@ -367,12 +367,12 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
         data = {"type": "flexible_assets", "attributes": {"tag_list": updated_tags}}
 
-        response = await self.client.patch(
+        response = self.client.patch(
             self._build_url(flexible_asset_id), {"data": data}
         )
         return FlexibleAsset.from_api_dict(response["data"])
 
-    async def update_status(
+    def update_status(
         self,
         flexible_asset_id: Union[str, int],
         status: Union[FlexibleAssetStatus, str],
@@ -393,12 +393,12 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
         data = {"type": "flexible_assets", "attributes": {"status": status_value}}
 
-        response = await self.client.patch(
+        response = self.client.patch(
             self._build_url(flexible_asset_id), {"data": data}
         )
         return FlexibleAsset.from_api_dict(response["data"])
 
-    async def get_asset_statistics(
+    def get_asset_statistics(
         self, organization_id: Optional[Union[str, int]] = None
     ) -> Dict[str, Any]:
         """
@@ -415,15 +415,15 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
             params["filter[organization_id]"] = str(organization_id)
 
         # Get all assets with status breakdown
-        active_assets = await self.list_by_status(
+        active_assets = self.list_by_status(
             FlexibleAssetStatus.ACTIVE, organization_id=organization_id, per_page=1
         )
 
-        inactive_assets = await self.list_by_status(
+        inactive_assets = self.list_by_status(
             FlexibleAssetStatus.INACTIVE, organization_id=organization_id, per_page=1
         )
 
-        archived_assets = await self.list_by_status(
+        archived_assets = self.list_by_status(
             FlexibleAssetStatus.ARCHIVED, organization_id=organization_id, per_page=1
         )
 
@@ -456,7 +456,7 @@ class FlexibleAssetTypesAPI(BaseAPI[FlexibleAssetType]):
             "flexible_asset_types",
         )
 
-    async def get_enabled_types(self) -> FlexibleAssetTypeCollection:
+    def get_enabled_types(self) -> FlexibleAssetTypeCollection:
         """
         Get all enabled flexible asset types.
 
@@ -465,10 +465,10 @@ class FlexibleAssetTypesAPI(BaseAPI[FlexibleAssetType]):
         """
         params = {"filter[enabled]": "true"}
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetTypeCollection.from_api_dict(response)
 
-    async def get_builtin_types(self) -> FlexibleAssetTypeCollection:
+    def get_builtin_types(self) -> FlexibleAssetTypeCollection:
         """
         Get all built-in flexible asset types.
 
@@ -477,10 +477,10 @@ class FlexibleAssetTypesAPI(BaseAPI[FlexibleAssetType]):
         """
         params = {"filter[builtin]": "true"}
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetTypeCollection.from_api_dict(response)
 
-    async def search_by_name(
+    def search_by_name(
         self, name: str, exact_match: bool = False
     ) -> FlexibleAssetTypeCollection:
         """
@@ -498,10 +498,10 @@ class FlexibleAssetTypesAPI(BaseAPI[FlexibleAssetType]):
         else:
             params = {"filter[name]": f"*{name}*"}
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetTypeCollection.from_api_dict(response)
 
-    async def get_fields(
+    def get_fields(
         self, flexible_asset_type_id: Union[str, int]
     ) -> FlexibleAssetFieldCollection:
         """
@@ -515,7 +515,7 @@ class FlexibleAssetTypesAPI(BaseAPI[FlexibleAssetType]):
         """
         url = f"{self._build_url(flexible_asset_type_id)}/relationships/flexible_asset_fields"
 
-        response = await self.client.get(url)
+        response = self.client.get(url)
         return FlexibleAssetFieldCollection.from_api_dict(response)
 
 
@@ -535,7 +535,7 @@ class FlexibleAssetFieldsAPI(BaseAPI[FlexibleAssetField]):
             "flexible_asset_fields",
         )
 
-    async def get_by_type(
+    def get_by_type(
         self, flexible_asset_type_id: Union[str, int]
     ) -> FlexibleAssetFieldCollection:
         """
@@ -549,10 +549,10 @@ class FlexibleAssetFieldsAPI(BaseAPI[FlexibleAssetField]):
         """
         params = {"filter[flexible_asset_type_id]": str(flexible_asset_type_id)}
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetFieldCollection.from_api_dict(response)
 
-    async def get_required_fields(
+    def get_required_fields(
         self, flexible_asset_type_id: Union[str, int]
     ) -> FlexibleAssetFieldCollection:
         """
@@ -569,10 +569,10 @@ class FlexibleAssetFieldsAPI(BaseAPI[FlexibleAssetField]):
             "filter[required]": "true",
         }
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetFieldCollection.from_api_dict(response)
 
-    async def get_by_kind(
+    def get_by_kind(
         self, kind: str, flexible_asset_type_id: Optional[Union[str, int]] = None
     ) -> FlexibleAssetFieldCollection:
         """
@@ -590,5 +590,5 @@ class FlexibleAssetFieldsAPI(BaseAPI[FlexibleAssetField]):
         if flexible_asset_type_id:
             params["filter[flexible_asset_type_id]"] = str(flexible_asset_type_id)
 
-        response = await self.client.get(self._build_url(), params=params)
+        response = self.client.get(self._build_url(), params=params)
         return FlexibleAssetFieldCollection.from_api_dict(response)

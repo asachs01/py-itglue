@@ -31,451 +31,315 @@ class ConfigurationsAPI(BaseAPI[Configuration]):
             endpoint_path="configurations",
         )
 
-    async def get_by_name(
-        self,
-        name: str,
-        organization_id: Optional[str] = None,
-        exact_match: bool = True,
-        include: Optional[List[str]] = None,
+    def get_by_name(
+        self, name: str, exact_match: bool = False, **kwargs
     ) -> Optional[Configuration]:
-        """Get configuration by name, optionally within a specific organization.
-
+        """Get configuration by name.
+        
         Args:
             name: Configuration name to search for
-            organization_id: Optional organization ID to filter by
-            exact_match: Whether to use exact name matching
-            include: List of related resources to include
-
+            exact_match: If True, performs exact match; otherwise fuzzy search
+            **kwargs: Additional query parameters
+            
         Returns:
             Configuration if found, None otherwise
         """
         logger.info(f"Getting configuration by name: {name}")
-
+        
         if exact_match:
-            filter_params = {"name": name}
+            # Use exact filter for exact match
+            kwargs["filter_params"] = {"name": name}
+            kwargs["per_page"] = 1
+            
+            result = self.list(**kwargs)
+            return result.data[0] if result.data else None
         else:
-            # Use partial matching
-            filter_params = {"name": f"*{name}*"}
+            # Use search for fuzzy matching
+            return self.search(name, **kwargs)
 
-        if organization_id:
-            filter_params["organization-id"] = organization_id
-
-        results = await self.list(
-            filter_params=filter_params, include=include, per_page=1
-        )
-
-        return results.data[0] if results.data else None
-
-    async def list_by_organization(
-        self,
-        organization_id: str,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        include: Optional[List[str]] = None,
-        **kwargs,
-    ) -> ITGlueResourceCollection[Configuration]:
+    def list_by_organization(self, organization_id: str, **kwargs) -> ITGlueResourceCollection[Configuration]:
         """List configurations for a specific organization.
-
+        
         Args:
-            organization_id: Organization ID to filter by
-            page: Page number for pagination
-            per_page: Number of items per page
-            include: List of related resources to include
+            organization_id: ID of the organization
             **kwargs: Additional query parameters
-
+            
         Returns:
-            Collection of configurations for the organization
+            ConfigurationCollection containing matching configurations
         """
         logger.info(f"Listing configurations for organization: {organization_id}")
+        
+        filter_params = kwargs.get("filter_params", {})
+        filter_params["organization-id"] = organization_id
+        kwargs["filter_params"] = filter_params
+        
+        return self.list(**kwargs)
 
-        filter_params = {"organization-id": organization_id}
-
-        return await self.list(
-            page=page,
-            per_page=per_page,
-            filter_params=filter_params,
-            include=include,
-            **kwargs,
-        )
-
-    async def list_by_type(
-        self,
-        configuration_type_id: str,
-        organization_id: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        include: Optional[List[str]] = None,
-        **kwargs,
-    ) -> ITGlueResourceCollection[Configuration]:
-        """List configurations filtered by type.
-
+    def list_by_type(self, configuration_type_id: str, **kwargs) -> ITGlueResourceCollection[Configuration]:
+        """List configurations by type.
+        
         Args:
-            configuration_type_id: Configuration type ID to filter by
-            organization_id: Optional organization ID to filter by
-            page: Page number for pagination
-            per_page: Number of items per page
-            include: List of related resources to include
+            configuration_type_id: ID of the configuration type
             **kwargs: Additional query parameters
-
+            
         Returns:
-            Collection of configurations with specified type
+            ConfigurationCollection containing matching configurations
         """
-        logger.info(f"Listing configurations with type: {configuration_type_id}")
+        logger.info(f"Listing configurations by type: {configuration_type_id}")
+        
+        filter_params = kwargs.get("filter_params", {})
+        filter_params["configuration-type-id"] = configuration_type_id
+        kwargs["filter_params"] = filter_params
+        
+        return self.list(**kwargs)
 
-        filter_params = {"configuration-type-id": configuration_type_id}
-
-        if organization_id:
-            filter_params["organization-id"] = organization_id
-
-        return await self.list(
-            page=page,
-            per_page=per_page,
-            filter_params=filter_params,
-            include=include,
-            **kwargs,
-        )
-
-    async def list_by_status(
-        self,
-        status: Union[ConfigurationStatus, str],
-        organization_id: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        include: Optional[List[str]] = None,
-        **kwargs,
+    def list_by_status(
+        self, status: Union[ConfigurationStatus, str], **kwargs
     ) -> ITGlueResourceCollection[Configuration]:
-        """List configurations filtered by status.
-
+        """List configurations by status.
+        
         Args:
-            status: Configuration status to filter by
-            organization_id: Optional organization ID to filter by
-            page: Page number for pagination
-            per_page: Number of items per page
-            include: List of related resources to include
+            status: Configuration status (enum or string)
             **kwargs: Additional query parameters
-
+            
         Returns:
-            Collection of configurations with specified status
+            ConfigurationCollection containing matching configurations
         """
-        logger.info(f"Listing configurations with status: {status}")
-
         if isinstance(status, ConfigurationStatus):
-            status_value = status.value
+            status_name = status.value
         else:
-            status_value = status
+            status_name = status
+            
+        logger.info(f"Listing configurations by status: {status_name}")
+        
+        filter_params = kwargs.get("filter_params", {})
+        filter_params["configuration-status-name"] = status_name
+        kwargs["filter_params"] = filter_params
+        
+        return self.list(**kwargs)
 
-        filter_params = {"configuration-status-name": status_value}
-
-        if organization_id:
-            filter_params["organization-id"] = organization_id
-
-        return await self.list(
-            page=page,
-            per_page=per_page,
-            filter_params=filter_params,
-            include=include,
-            **kwargs,
-        )
-
-    async def get_active_configurations(
-        self,
-        organization_id: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        **kwargs,
-    ) -> ITGlueResourceCollection[Configuration]:
+    def get_active_configurations(self, **kwargs) -> ITGlueResourceCollection[Configuration]:
         """Get all active configurations.
-
+        
         Args:
-            organization_id: Optional organization ID to filter by
-            page: Page number for pagination
-            per_page: Number of items per page
             **kwargs: Additional query parameters
-
+            
         Returns:
-            Collection of active configurations
+            ConfigurationCollection containing active configurations
         """
-        return await self.list_by_status(
-            status=ConfigurationStatus.ACTIVE,
-            organization_id=organization_id,
-            page=page,
-            per_page=per_page,
-            **kwargs,
-        )
+        return self.list_by_status(ConfigurationStatus.ACTIVE, **kwargs)
 
-    async def search_by_hostname(
-        self,
-        hostname: str,
-        organization_id: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        **kwargs,
-    ) -> ITGlueResourceCollection[Configuration]:
+    def search_by_hostname(self, hostname: str, **kwargs) -> ITGlueResourceCollection[Configuration]:
         """Search configurations by hostname.
-
+        
         Args:
             hostname: Hostname to search for
-            organization_id: Optional organization ID to filter by
-            page: Page number for pagination
-            per_page: Number of items per page
             **kwargs: Additional query parameters
-
+            
         Returns:
-            Collection of configurations matching hostname
+            ConfigurationCollection containing matching configurations
         """
         logger.info(f"Searching configurations by hostname: {hostname}")
+        
+        filter_params = kwargs.get("filter_params", {})
+        filter_params["hostname"] = hostname
+        kwargs["filter_params"] = filter_params
+        
+        return self.list(**kwargs)
 
-        filter_params = {"hostname": hostname}
-
-        if organization_id:
-            filter_params["organization-id"] = organization_id
-
-        return await self.list(
-            page=page, per_page=per_page, filter_params=filter_params, **kwargs
-        )
-
-    async def search_by_ip_address(
-        self,
-        ip_address: str,
-        organization_id: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        **kwargs,
-    ) -> ITGlueResourceCollection[Configuration]:
+    def search_by_ip_address(self, ip_address: str, **kwargs) -> ITGlueResourceCollection[Configuration]:
         """Search configurations by IP address.
-
+        
         Args:
             ip_address: IP address to search for
-            organization_id: Optional organization ID to filter by
-            page: Page number for pagination
-            per_page: Number of items per page
             **kwargs: Additional query parameters
-
+            
         Returns:
-            Collection of configurations matching IP address
+            ConfigurationCollection containing matching configurations
         """
-        logger.info(f"Searching configurations by IP address: {ip_address}")
+        logger.info(f"Searching configurations by IP: {ip_address}")
+        
+        filter_params = kwargs.get("filter_params", {})
+        filter_params["primary-ip"] = ip_address
+        kwargs["filter_params"] = filter_params
+        
+        return self.list(**kwargs)
 
-        filter_params = {"primary-ip": ip_address}
-
-        if organization_id:
-            filter_params["organization-id"] = organization_id
-
-        return await self.list(
-            page=page, per_page=per_page, filter_params=filter_params, **kwargs
-        )
-
-    async def update_status(
+    def update_status(
         self, configuration_id: str, status: Union[ConfigurationStatus, str], **kwargs
     ) -> Configuration:
         """Update configuration status.
-
+        
         Args:
-            configuration_id: ID of configuration to update
-            status: New status for the configuration
-            **kwargs: Additional update data
-
+            configuration_id: ID of the configuration to update
+            status: New status (enum or string)
+            **kwargs: Additional query parameters
+            
         Returns:
-            Updated configuration
-
+            Updated Configuration
+            
         Raises:
             ITGlueValidationError: If status is invalid
         """
-        logger.info(f"Updating configuration {configuration_id} status to: {status}")
-
         if isinstance(status, ConfigurationStatus):
-            status_value = status.value
+            status_name = status.value
+        elif isinstance(status, str) and status in [s.value for s in ConfigurationStatus]:
+            status_name = status
         else:
-            status_value = status
-            # Validate status
-            try:
-                ConfigurationStatus(status_value)
-            except ValueError:
-                raise ITGlueValidationError(
-                    f"Invalid configuration status: {status_value}"
-                )
+            raise ITGlueValidationError(f"Invalid configuration status: {status}")
+            
+        logger.info(f"Updating configuration {configuration_id} status to: {status_name}")
+        
+        data = {"configuration-status-name": status_name}
+        return self.update(configuration_id, data, **kwargs)
 
-        update_data = {"configuration_status_name": status_value}
-        update_data.update(kwargs)
-
-        return await self.update(configuration_id, update_data)
-
-    async def create_configuration(
+    def create_configuration(
         self,
-        name: str,
         organization_id: str,
+        name: str,
         configuration_type_id: str,
         hostname: Optional[str] = None,
         primary_ip: Optional[str] = None,
-        operating_system_id: Optional[str] = None,
+        operating_system_notes: Optional[str] = None,
         notes: Optional[str] = None,
         **kwargs,
     ) -> Configuration:
-        """Create a new configuration with required fields.
-
+        """Create a new configuration.
+        
         Args:
+            organization_id: ID of the organization
             name: Configuration name
-            organization_id: Organization ID this configuration belongs to
-            configuration_type_id: Configuration type ID
+            configuration_type_id: ID of the configuration type
             hostname: Optional hostname
             primary_ip: Optional primary IP address
-            operating_system_id: Optional operating system ID
-            notes: Optional notes
+            operating_system_notes: Optional OS notes
+            notes: Optional general notes
             **kwargs: Additional configuration attributes
-
+            
         Returns:
-            Created configuration
-
-        Raises:
-            ITGlueValidationError: If required data is missing or invalid
+            Created Configuration
         """
-        logger.info(f"Creating configuration: {name}")
-
-        configuration_data = {
+        logger.info(f"Creating configuration: {name} for organization {organization_id}")
+        
+        data = {
+            "organization-id": organization_id,
             "name": name,
-            "organization_id": organization_id,
-            "configuration_type_id": configuration_type_id,
-            "configuration_status_name": ConfigurationStatus.ACTIVE.value,  # Default to active
+            "configuration-type-id": configuration_type_id,
         }
-
+        
+        # Add optional fields
         if hostname:
-            configuration_data["hostname"] = hostname
+            data["hostname"] = hostname
         if primary_ip:
-            configuration_data["primary_ip"] = primary_ip
-        if operating_system_id:
-            configuration_data["operating_system_id"] = operating_system_id
+            data["primary-ip"] = primary_ip
+        if operating_system_notes:
+            data["operating-system-notes"] = operating_system_notes
         if notes:
-            configuration_data["notes"] = notes
+            data["notes"] = notes
+            
+        # Add any additional kwargs
+        data.update(kwargs)
+        
+        return self.create(data)
 
-        # Add any additional attributes
-        configuration_data.update(kwargs)
-
-        return await self.create(configuration_data)
-
-    async def bulk_update_status(
+    def bulk_update_status(
         self, configuration_ids: List[str], status: Union[ConfigurationStatus, str]
     ) -> List[Configuration]:
-        """Update status for multiple configurations.
-
+        """Bulk update status for multiple configurations.
+        
         Args:
             configuration_ids: List of configuration IDs to update
             status: New status for all configurations
-
+            
         Returns:
-            List of updated configurations
-
-        Note:
-            This performs individual updates. For true bulk operations,
-            ITGlue may provide batch endpoints in the future.
+            List of updated Configuration objects
         """
-        logger.info(
-            f"Bulk updating {len(configuration_ids)} configurations to status: {status}"
-        )
-
-        updated_configurations = []
+        if isinstance(status, ConfigurationStatus):
+            status_name = status.value
+        elif isinstance(status, str) and status in [s.value for s in ConfigurationStatus]:
+            status_name = status
+        else:
+            raise ITGlueValidationError(f"Invalid configuration status: {status}")
+            
+        logger.info(f"Bulk updating {len(configuration_ids)} configurations to status: {status_name}")
+        
+        updated_configs = []
         for config_id in configuration_ids:
             try:
-                updated_config = await self.update_status(config_id, status)
-                updated_configurations.append(updated_config)
+                updated_config = self.update_status(config_id, status_name)
+                updated_configs.append(updated_config)
             except Exception as e:
                 logger.error(f"Failed to update configuration {config_id}: {e}")
-                continue
+                
+        return updated_configs
 
-        logger.info(
-            f"Successfully updated {len(updated_configurations)} of {len(configuration_ids)} configurations"
-        )
-        return updated_configurations
-
-    async def get_configuration_statistics(
-        self, organization_id: Optional[str] = None, include_inactive: bool = False
-    ) -> Dict[str, Any]:
+    def get_configuration_statistics(self) -> Dict[str, Any]:
         """Get statistics about configurations.
-
-        Args:
-            organization_id: Optional organization ID to filter by
-            include_inactive: Whether to include inactive configurations in counts
-
+        
         Returns:
-            Dictionary with configuration statistics
+            Dictionary containing configuration statistics
         """
-        logger.info("Generating configuration statistics")
-
+        logger.info("Getting configuration statistics")
+        
+        # Get all configurations for analysis
+        all_configs = self.list_all()
+        
         stats = {
-            "total": 0,
+            "total_count": len(all_configs.data),
             "by_status": {},
+            "by_type": {},
             "by_organization": {},
-            "active": 0,
-            "inactive": 0,
         }
-
-        # Get configurations
-        filter_params = {}
-        if organization_id:
-            filter_params["organization-id"] = organization_id
-        if not include_inactive:
-            filter_params["configuration-status-name"] = (
-                ConfigurationStatus.ACTIVE.value
-            )
-
-        if filter_params:
-            configurations = await self.list(filter_params=filter_params)
-        else:
-            configurations = await self.list_all()
-
-        stats["total"] = len(configurations.data)
-
-        # Count by status and organization
-        for config in configurations.data:
+        
+        for config in all_configs.data:
             # Count by status
-            config_status = config.configuration_status_name or "Unknown"
-            stats["by_status"][config_status] = (
-                stats["by_status"].get(config_status, 0) + 1
-            )
-
+            status = config.configuration_status_name or "Unknown"
+            stats["by_status"][status] = stats["by_status"].get(status, 0) + 1
+            
+            # Count by type
+            config_type = config.configuration_type_name or "Unknown"
+            stats["by_type"][config_type] = stats["by_type"].get(config_type, 0) + 1
+            
             # Count by organization
-            config_org = config.organization_id or "Unknown"
-            stats["by_organization"][config_org] = (
-                stats["by_organization"].get(config_org, 0) + 1
-            )
-
-            if config.is_active():
-                stats["active"] += 1
-            else:
-                stats["inactive"] += 1
-
+            org_id = config.organization_id or "Unknown"
+            stats["by_organization"][org_id] = stats["by_organization"].get(org_id, 0) + 1
+            
         return stats
 
-    async def get_configurations_by_contact(
-        self,
-        contact_id: str,
-        contact_type: str = "Primary",
-        organization_id: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        **kwargs,
-    ) -> ITGlueResourceCollection[Configuration]:
-        """Get configurations associated with a specific contact.
-
+    def get_organization_configuration_report(self, organization_id: str) -> Dict[str, Any]:
+        """Get detailed configuration report for an organization.
+        
         Args:
-            contact_id: Contact ID to filter by
-            contact_type: Type of contact relationship
-            organization_id: Optional organization ID to filter by
-            page: Page number for pagination
-            per_page: Number of items per page
-            **kwargs: Additional query parameters
-
+            organization_id: ID of the organization
+            
         Returns:
-            Collection of configurations associated with the contact
+            Dictionary containing organization configuration report
         """
-        logger.info(f"Getting configurations for contact: {contact_id}")
-
-        contact_type_value = contact_type
-
-        filter_params = {"contact-id": contact_id, "contact-type": contact_type_value}
-
-        if organization_id:
-            filter_params["organization-id"] = organization_id
-
-        return await self.list(
-            page=page, per_page=per_page, filter_params=filter_params, **kwargs
-        )
+        logger.info(f"Getting configuration report for organization: {organization_id}")
+        
+        configs = self.list_by_organization(organization_id)
+        
+        report = {
+            "organization_id": organization_id,
+            "total_configurations": len(configs.data),
+            "active_configurations": len([c for c in configs.data if c.is_active()]),
+            "retired_configurations": len([c for c in configs.data if c.is_retired()]),
+            "configurations_by_type": {},
+        }
+        
+        for config in configs.data:
+            config_type = config.configuration_type_name or "Unknown"
+            if config_type not in report["configurations_by_type"]:
+                report["configurations_by_type"][config_type] = {
+                    "total": 0,
+                    "active": 0,
+                    "retired": 0,
+                }
+            
+            report["configurations_by_type"][config_type]["total"] += 1
+            if config.is_active():
+                report["configurations_by_type"][config_type]["active"] += 1
+            elif config.is_retired():
+                report["configurations_by_type"][config_type]["retired"] += 1
+                
+        return report

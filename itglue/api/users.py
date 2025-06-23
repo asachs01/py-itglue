@@ -27,7 +27,7 @@ class UsersAPI(BaseAPI[User]):
         """Initialize the Users API."""
         super().__init__(client, ResourceType.USERS, User, "users")
 
-    async def get_by_email(self, email: str, **kwargs) -> Optional[User]:
+    def get_by_email(self, email: str, **kwargs) -> Optional[User]:
         """
         Get a user by email address.
 
@@ -45,7 +45,7 @@ class UsersAPI(BaseAPI[User]):
             params = {"filter[email]": email}
             params.update(kwargs)
 
-            result = await self.list(params=params, page_size=1)
+            result = self.list(params=params, page_size=1)
             if isinstance(result, UserCollection) and len(result) > 0:
                 return result[0]
             elif isinstance(result, list) and len(result) > 0:
@@ -55,7 +55,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to get user by email: {str(e)}") from e
 
-    async def search_by_name(self, name: str, **kwargs) -> List[User]:
+    def search_by_name(self, name: str, **kwargs) -> List[User]:
         """
         Search users by name (first name, last name, or full name).
 
@@ -74,7 +74,7 @@ class UsersAPI(BaseAPI[User]):
             params = {"filter[first-name]": name, "filter[last-name]": name}
             params.update(kwargs)
 
-            result = await self.list(params=params)
+            result = self.list(params=params)
             if isinstance(result, UserCollection):
                 return result.to_list()
             return result if isinstance(result, list) else []
@@ -82,7 +82,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to search users by name: {str(e)}") from e
 
-    async def filter_by_role(self, role: Union[str, UserRole], **kwargs) -> List[User]:
+    def filter_by_role(self, role: Union[str, UserRole], **kwargs) -> List[User]:
         """
         Get users by role.
 
@@ -101,7 +101,7 @@ class UsersAPI(BaseAPI[User]):
             params = {"filter[role-name]": role_name}
             params.update(kwargs)
 
-            result = await self.list(params=params)
+            result = self.list(params=params)
             if isinstance(result, UserCollection):
                 return result.to_list()
             return result if isinstance(result, list) else []
@@ -109,7 +109,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to filter users by role: {str(e)}") from e
 
-    async def get_active_users(self, **kwargs) -> List[User]:
+    def get_active_users(self, **kwargs) -> List[User]:
         """
         Get all active users (users who have accepted their invitation).
 
@@ -127,7 +127,7 @@ class UsersAPI(BaseAPI[User]):
             params = {"filter[invitation-accepted-at]": "!null"}
             params.update(kwargs)
 
-            result = await self.list(params=params)
+            result = self.list(params=params)
             if isinstance(result, UserCollection):
                 return result.filter_active_users()
             return (
@@ -139,7 +139,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to get active users: {str(e)}") from e
 
-    async def get_invited_users(self, **kwargs) -> List[User]:
+    def get_invited_users(self, **kwargs) -> List[User]:
         """
         Get users who have been invited but haven't accepted yet.
 
@@ -160,7 +160,7 @@ class UsersAPI(BaseAPI[User]):
             }
             params.update(kwargs)
 
-            result = await self.list(params=params)
+            result = self.list(params=params)
             if isinstance(result, UserCollection):
                 return result.filter_invited_users()
             return (
@@ -172,7 +172,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to get invited users: {str(e)}") from e
 
-    async def get_my_glue_users(self, **kwargs) -> List[User]:
+    def get_my_glue_users(self, **kwargs) -> List[User]:
         """
         Get users with MyGlue access.
 
@@ -189,7 +189,7 @@ class UsersAPI(BaseAPI[User]):
             params = {"filter[my-glue]": "true"}
             params.update(kwargs)
 
-            result = await self.list(params=params)
+            result = self.list(params=params)
             if isinstance(result, UserCollection):
                 return result.filter_by_my_glue_access(True)
             return (
@@ -201,7 +201,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to get MyGlue users: {str(e)}") from e
 
-    async def get_recently_active_users(self, days: int = 30, **kwargs) -> List[User]:
+    def get_recently_active_users(self, days: int = 30, **kwargs) -> List[User]:
         """
         Get users who have been active within the specified number of days.
 
@@ -224,7 +224,7 @@ class UsersAPI(BaseAPI[User]):
             params = {"filter[last-sign-in-at]": f">={cutoff_str}"}
             params.update(kwargs)
 
-            result = await self.list(params=params)
+            result = self.list(params=params)
             if isinstance(result, UserCollection):
                 return result.get_recently_active_users(days)
 
@@ -244,7 +244,7 @@ class UsersAPI(BaseAPI[User]):
                 f"Failed to get recently active users: {str(e)}"
             ) from e
 
-    async def get_top_reputation_users(self, limit: int = 10, **kwargs) -> List[User]:
+    def get_top_reputation_users(self, limit: int = 10, **kwargs) -> List[User]:
         """
         Get users with the highest reputation scores.
 
@@ -262,7 +262,7 @@ class UsersAPI(BaseAPI[User]):
             params = {"sort": "-reputation", "page[size]": str(limit)}
             params.update(kwargs)
 
-            result = await self.list(params=params)
+            result = self.list(params=params)
             if isinstance(result, UserCollection):
                 return result.get_top_reputation_users(limit)
 
@@ -280,7 +280,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to get top reputation users: {str(e)}") from e
 
-    async def create_user(self, user_data: Dict[str, Any], **kwargs) -> User:
+    def create_user(self, user_data: Dict[str, Any], **kwargs) -> User:
         """
         Create a new user account.
 
@@ -295,12 +295,12 @@ class UsersAPI(BaseAPI[User]):
             ITGlueAPIError: If the API request fails
         """
         try:
-            return await self.create(user_data, **kwargs)
+            return self.create(user_data, **kwargs)
 
         except Exception as e:
             raise ITGlueAPIError(f"Failed to create user: {str(e)}") from e
 
-    async def update_user_role(
+    def update_user_role(
         self, user_id: str, role: Union[str, UserRole], **kwargs
     ) -> User:
         """
@@ -321,12 +321,12 @@ class UsersAPI(BaseAPI[User]):
             role_name = role.value if isinstance(role, UserRole) else role
             update_data = {"role-name": role_name}
 
-            return await self.update(user_id, update_data, **kwargs)
+            return self.update(user_id, update_data, **kwargs)
 
         except Exception as e:
             raise ITGlueAPIError(f"Failed to update user role: {str(e)}") from e
 
-    async def update_user_profile(
+    def update_user_profile(
         self, user_id: str, profile_data: Dict[str, Any], **kwargs
     ) -> User:
         """
@@ -344,12 +344,12 @@ class UsersAPI(BaseAPI[User]):
             ITGlueAPIError: If the API request fails
         """
         try:
-            return await self.update(user_id, profile_data, **kwargs)
+            return self.update(user_id, profile_data, **kwargs)
 
         except Exception as e:
             raise ITGlueAPIError(f"Failed to update user profile: {str(e)}") from e
 
-    async def resend_invitation(self, user_id: str, **kwargs) -> bool:
+    def resend_invitation(self, user_id: str, **kwargs) -> bool:
         """
         Resend invitation to a user.
 
@@ -366,13 +366,13 @@ class UsersAPI(BaseAPI[User]):
         try:
             # This would typically be a POST to a specific endpoint
             endpoint = f"{self.endpoint_path}/{user_id}/resend_invitation"
-            await self.client.post(endpoint, **kwargs)
+            self.client.post(endpoint, **kwargs)
             return True
 
         except Exception as e:
             raise ITGlueAPIError(f"Failed to resend invitation: {str(e)}") from e
 
-    async def get_user_statistics(self, **kwargs) -> Dict[str, Any]:
+    def get_user_statistics(self, **kwargs) -> Dict[str, Any]:
         """
         Get statistics about users in the system.
 
@@ -387,7 +387,7 @@ class UsersAPI(BaseAPI[User]):
         """
         try:
             # Get all users for statistics calculation
-            all_users = await self.list(**kwargs)
+            all_users = self.list(**kwargs)
 
             if isinstance(all_users, UserCollection):
                 collection = all_users
@@ -435,7 +435,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to get user statistics: {str(e)}") from e
 
-    async def search_users(self, query: str, **kwargs) -> List[User]:
+    def search_users(self, query: str, **kwargs) -> List[User]:
         """
         Search users by multiple criteria (name, email, etc.).
 
@@ -455,12 +455,12 @@ class UsersAPI(BaseAPI[User]):
 
             # Search by email
             if "@" in query:
-                email_result = await self.get_by_email(query, **kwargs)
+                email_result = self.get_by_email(query, **kwargs)
                 if email_result:
                     results.append(email_result)
 
             # Search by name
-            name_results = await self.search_by_name(query, **kwargs)
+            name_results = self.search_by_name(query, **kwargs)
             results.extend(name_results)
 
             # Remove duplicates while preserving order
@@ -476,7 +476,7 @@ class UsersAPI(BaseAPI[User]):
         except Exception as e:
             raise ITGlueAPIError(f"Failed to search users: {str(e)}") from e
 
-    async def get_admin_users(self, **kwargs) -> List[User]:
+    def get_admin_users(self, **kwargs) -> List[User]:
         """
         Get all users with admin role.
 
@@ -489,9 +489,9 @@ class UsersAPI(BaseAPI[User]):
         Raises:
             ITGlueAPIError: If the API request fails
         """
-        return await self.filter_by_role(UserRole.ADMIN, **kwargs)
+        return self.filter_by_role(UserRole.ADMIN, **kwargs)
 
-    async def get_creator_users(self, **kwargs) -> List[User]:
+    def get_creator_users(self, **kwargs) -> List[User]:
         """
         Get all users with creator role.
 
@@ -504,9 +504,9 @@ class UsersAPI(BaseAPI[User]):
         Raises:
             ITGlueAPIError: If the API request fails
         """
-        return await self.filter_by_role(UserRole.CREATOR, **kwargs)
+        return self.filter_by_role(UserRole.CREATOR, **kwargs)
 
-    async def get_editor_users(self, **kwargs) -> List[User]:
+    def get_editor_users(self, **kwargs) -> List[User]:
         """
         Get all users with editor role.
 
@@ -519,9 +519,9 @@ class UsersAPI(BaseAPI[User]):
         Raises:
             ITGlueAPIError: If the API request fails
         """
-        return await self.filter_by_role(UserRole.EDITOR, **kwargs)
+        return self.filter_by_role(UserRole.EDITOR, **kwargs)
 
-    async def get_lite_users(self, **kwargs) -> List[User]:
+    def get_lite_users(self, **kwargs) -> List[User]:
         """
         Get all users with lite role.
 
@@ -534,9 +534,9 @@ class UsersAPI(BaseAPI[User]):
         Raises:
             ITGlueAPIError: If the API request fails
         """
-        return await self.filter_by_role(UserRole.LITE, **kwargs)
+        return self.filter_by_role(UserRole.LITE, **kwargs)
 
-    async def get_viewer_users(self, **kwargs) -> List[User]:
+    def get_viewer_users(self, **kwargs) -> List[User]:
         """
         Get all users with viewer role.
 
@@ -549,4 +549,4 @@ class UsersAPI(BaseAPI[User]):
         Raises:
             ITGlueAPIError: If the API request fails
         """
-        return await self.filter_by_role(UserRole.VIEWER, **kwargs)
+        return self.filter_by_role(UserRole.VIEWER, **kwargs)

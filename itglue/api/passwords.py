@@ -45,7 +45,7 @@ class PasswordsAPI(BaseAPI[Password]):
 
     # Password-specific search and filter methods
 
-    async def search_passwords(
+    def search_passwords(
         self, query: str, organization_id: Optional[str] = None, **params
     ) -> List[Password]:
         """
@@ -64,12 +64,12 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             search_params["filter[organization-id]"] = organization_id
 
-        result = await self.list(params=search_params)
+        result = self.list(params=search_params)
         if isinstance(result, PasswordCollection):
             return result.to_list()
         return result if isinstance(result, list) else []
 
-    async def get_by_name(
+    def get_by_name(
         self, name: str, organization_id: Optional[str] = None
     ) -> Optional[Password]:
         """
@@ -87,7 +87,7 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             params["filter[organization-id]"] = organization_id
 
-        result = await self.list(params=params)
+        result = self.list(params=params)
 
         # Convert to list if needed
         if isinstance(result, PasswordCollection):
@@ -103,7 +103,7 @@ class PasswordsAPI(BaseAPI[Password]):
 
         return None
 
-    async def search_by_username(
+    def search_by_username(
         self, username: str, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -121,9 +121,9 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=params)
+        return self.list(params=params)
 
-    async def search_by_url(
+    def search_by_url(
         self, url: str, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -141,11 +141,11 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=params)
+        return self.list(params=params)
 
     # Organization-based filtering
 
-    async def get_organization_passwords(
+    def get_organization_passwords(
         self, organization_id: str, include_archived: bool = False, **params
     ) -> List[Password]:
         """
@@ -164,11 +164,11 @@ class PasswordsAPI(BaseAPI[Password]):
         if not include_archived:
             filter_params["filter[archived]"] = "false"
 
-        return await self.list(params=filter_params)
+        return self.list(params=filter_params)
 
     # Security and visibility filtering
 
-    async def filter_by_category(
+    def filter_by_category(
         self,
         category: Union[PasswordCategory, str],
         organization_id: Optional[str] = None,
@@ -193,9 +193,9 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             filter_params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=filter_params)
+        return self.list(params=filter_params)
 
-    async def filter_by_visibility(
+    def filter_by_visibility(
         self,
         visibility: Union[PasswordVisibility, str],
         organization_id: Optional[str] = None,
@@ -220,9 +220,9 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             filter_params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=filter_params)
+        return self.list(params=filter_params)
 
-    async def filter_by_type(
+    def filter_by_type(
         self,
         password_type: Union[PasswordType, str],
         organization_id: Optional[str] = None,
@@ -247,11 +247,11 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             filter_params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=filter_params)
+        return self.list(params=filter_params)
 
     # Security-focused methods
 
-    async def get_critical_passwords(
+    def get_critical_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -263,9 +263,9 @@ class PasswordsAPI(BaseAPI[Password]):
         Returns:
             List of critical passwords
         """
-        return await self.filter_by_category(PasswordCategory.CRITICAL, organization_id)
+        return self.filter_by_category(PasswordCategory.CRITICAL, organization_id)
 
-    async def get_high_security_passwords(
+    def get_high_security_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -277,10 +277,10 @@ class PasswordsAPI(BaseAPI[Password]):
         Returns:
             List of high security passwords
         """
-        high_passwords = await self.filter_by_category(
+        high_passwords = self.filter_by_category(
             PasswordCategory.HIGH, organization_id
         )
-        critical_passwords = await self.filter_by_category(
+        critical_passwords = self.filter_by_category(
             PasswordCategory.CRITICAL, organization_id
         )
 
@@ -296,7 +296,7 @@ class PasswordsAPI(BaseAPI[Password]):
 
         return unique_passwords
 
-    async def get_shared_passwords(
+    def get_shared_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -309,13 +309,13 @@ class PasswordsAPI(BaseAPI[Password]):
             List of shared passwords
         """
         # Get passwords with different visibility levels
-        shared_passwords = await self.filter_by_visibility(
+        shared_passwords = self.filter_by_visibility(
             PasswordVisibility.SHARED, organization_id
         )
-        org_passwords = await self.filter_by_visibility(
+        org_passwords = self.filter_by_visibility(
             PasswordVisibility.ORGANIZATION, organization_id
         )
-        everyone_passwords = await self.filter_by_visibility(
+        everyone_passwords = self.filter_by_visibility(
             PasswordVisibility.EVERYONE, organization_id
         )
 
@@ -331,7 +331,7 @@ class PasswordsAPI(BaseAPI[Password]):
 
         return unique_passwords
 
-    async def get_private_passwords(
+    def get_private_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -343,11 +343,11 @@ class PasswordsAPI(BaseAPI[Password]):
         Returns:
             List of private passwords
         """
-        return await self.filter_by_visibility(
+        return self.filter_by_visibility(
             PasswordVisibility.PRIVATE, organization_id
         )
 
-    async def get_embedded_passwords(
+    def get_embedded_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -359,9 +359,9 @@ class PasswordsAPI(BaseAPI[Password]):
         Returns:
             List of embedded passwords
         """
-        return await self.filter_by_type(PasswordType.EMBEDDED, organization_id)
+        return self.filter_by_type(PasswordType.EMBEDDED, organization_id)
 
-    async def get_linked_passwords(
+    def get_linked_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -373,11 +373,11 @@ class PasswordsAPI(BaseAPI[Password]):
         Returns:
             List of linked passwords
         """
-        return await self.filter_by_type(PasswordType.LINKED, organization_id)
+        return self.filter_by_type(PasswordType.LINKED, organization_id)
 
     # Special state filtering
 
-    async def get_favorite_passwords(
+    def get_favorite_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -394,9 +394,9 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=params)
+        return self.list(params=params)
 
-    async def get_archived_passwords(
+    def get_archived_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -413,9 +413,9 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=params)
+        return self.list(params=params)
 
-    async def get_active_passwords(
+    def get_active_passwords(
         self, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -432,11 +432,11 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=params)
+        return self.list(params=params)
 
     # Time-based filtering
 
-    async def get_recently_updated_passwords(
+    def get_recently_updated_passwords(
         self, days: int = 30, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -459,9 +459,9 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=params)
+        return self.list(params=params)
 
-    async def get_stale_passwords(
+    def get_stale_passwords(
         self, days: int = 90, organization_id: Optional[str] = None
     ) -> List[Password]:
         """
@@ -484,11 +484,11 @@ class PasswordsAPI(BaseAPI[Password]):
         if organization_id:
             params["filter[organization-id]"] = organization_id
 
-        return await self.list(params=params)
+        return self.list(params=params)
 
     # Password management operations
 
-    async def create_password(
+    def create_password(
         self,
         name: str,
         username: str,
@@ -556,9 +556,9 @@ class PasswordsAPI(BaseAPI[Password]):
         if notes:
             data["attributes"]["notes"] = notes
 
-        return await self.create(data)
+        return self.create(data)
 
-    async def update_password_value(
+    def update_password_value(
         self, password_id: str, new_password: str
     ) -> Password:
         """
@@ -576,9 +576,9 @@ class PasswordsAPI(BaseAPI[Password]):
             "attributes": {"password": new_password},
         }
 
-        return await self.update(password_id, data)
+        return self.update(password_id, data)
 
-    async def update_password_visibility(
+    def update_password_visibility(
         self, password_id: str, visibility: Union[PasswordVisibility, str]
     ) -> Password:
         """
@@ -599,9 +599,9 @@ class PasswordsAPI(BaseAPI[Password]):
             "attributes": {"visibility": visibility},
         }
 
-        return await self.update(password_id, data)
+        return self.update(password_id, data)
 
-    async def update_password_category(
+    def update_password_category(
         self, password_id: str, category: Union[PasswordCategory, str]
     ) -> Password:
         """
@@ -622,9 +622,9 @@ class PasswordsAPI(BaseAPI[Password]):
             "attributes": {"password-category-name": category},
         }
 
-        return await self.update(password_id, data)
+        return self.update(password_id, data)
 
-    async def toggle_favorite(self, password_id: str) -> Password:
+    def toggle_favorite(self, password_id: str) -> Password:
         """
         Toggle password favorite status.
 
@@ -635,7 +635,7 @@ class PasswordsAPI(BaseAPI[Password]):
             Updated password
         """
         # Get current password to check favorite status
-        password = await self.get(password_id)
+        password = self.get(password_id)
         new_favorite = not password.favorite
 
         data = {
@@ -643,9 +643,9 @@ class PasswordsAPI(BaseAPI[Password]):
             "attributes": {"favorite": new_favorite},
         }
 
-        return await self.update(password_id, data)
+        return self.update(password_id, data)
 
-    async def archive_password(self, password_id: str) -> Password:
+    def archive_password(self, password_id: str) -> Password:
         """
         Archive a password.
 
@@ -657,9 +657,9 @@ class PasswordsAPI(BaseAPI[Password]):
         """
         data = {"type": ResourceType.PASSWORDS.value, "attributes": {"archived": True}}
 
-        return await self.update(password_id, data)
+        return self.update(password_id, data)
 
-    async def unarchive_password(self, password_id: str) -> Password:
+    def unarchive_password(self, password_id: str) -> Password:
         """
         Unarchive a password.
 
@@ -671,11 +671,11 @@ class PasswordsAPI(BaseAPI[Password]):
         """
         data = {"type": ResourceType.PASSWORDS.value, "attributes": {"archived": False}}
 
-        return await self.update(password_id, data)
+        return self.update(password_id, data)
 
     # Analytics and reporting
 
-    async def get_password_statistics(
+    def get_password_statistics(
         self, organization_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
@@ -688,7 +688,7 @@ class PasswordsAPI(BaseAPI[Password]):
             Dictionary with password statistics
         """
         # Get all active passwords
-        all_passwords = await self.get_active_passwords(organization_id)
+        all_passwords = self.get_active_passwords(organization_id)
 
         if not all_passwords:
             return {
@@ -713,7 +713,7 @@ class PasswordsAPI(BaseAPI[Password]):
         )
 
         # Get archived count separately
-        archived_passwords = await self.get_archived_passwords(organization_id)
+        archived_passwords = self.get_archived_passwords(organization_id)
 
         # Calculate statistics
         stats = collection.get_security_statistics()
@@ -724,7 +724,7 @@ class PasswordsAPI(BaseAPI[Password]):
 
         return stats
 
-    async def get_organization_password_report(
+    def get_organization_password_report(
         self, organization_id: str
     ) -> Dict[str, Any]:
         """
@@ -736,9 +736,9 @@ class PasswordsAPI(BaseAPI[Password]):
         Returns:
             Comprehensive password report
         """
-        stats = await self.get_password_statistics(organization_id)
-        stale_passwords = await self.get_stale_passwords(90, organization_id)
-        recent_passwords = await self.get_recently_updated_passwords(
+        stats = self.get_password_statistics(organization_id)
+        stale_passwords = self.get_stale_passwords(90, organization_id)
+        recent_passwords = self.get_recently_updated_passwords(
             30, organization_id
         )
 

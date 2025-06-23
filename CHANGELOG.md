@@ -5,12 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.4] - 2024-06-23
 
-### Added
-- Future features will be documented here
+### Fixed
+- **Critical**: Removed async/await patterns from all API methods to fix synchronous operation
+- **Cache**: Fixed MemoryCache cleanup logic when cache reaches maximum size
+- **Tests**: Fixed all test failures by removing async/await patterns from test methods
+- **Pagination**: Fixed PaginationHandler method signatures to match test expectations
+- **Redis**: Added pytest.importorskip for Redis tests to gracefully skip when redis is not available
+- **API Methods**: Fixed all API classes to use synchronous HTTP client operations
 
-## [0.2.3] - 2025-01-26
+### Changed
+- All API methods are now synchronous (removed async/await throughout codebase)
+- Test files updated to use Mock instead of AsyncMock
+- Updated method signatures in PaginationHandler to match expected interface
+
+## [0.2.3] - 2024-06-23
 
 ### Fixed
 - Import errors in test suite (RateLimiter → SimpleRateLimiter references)

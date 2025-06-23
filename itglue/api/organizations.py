@@ -31,7 +31,7 @@ class OrganizationsAPI(BaseAPI[Organization]):
             endpoint_path="organizations",
         )
 
-    async def get_by_name(
+    def get_by_name(
         self, name: str, exact_match: bool = True, include: Optional[List[str]] = None
     ) -> Optional[Organization]:
         """Get organization by name.
@@ -52,13 +52,13 @@ class OrganizationsAPI(BaseAPI[Organization]):
             # Use partial matching
             filter_params = {"name": f"*{name}*"}
 
-        results = await self.list(
+        results = self.list(
             filter_params=filter_params, include=include, per_page=1
         )
 
         return results.data[0] if results.data else None
 
-    async def list_by_status(
+    def list_by_status(
         self,
         status: Union[OrganizationStatus, str],
         page: Optional[int] = None,
@@ -87,7 +87,7 @@ class OrganizationsAPI(BaseAPI[Organization]):
 
         filter_params = {"organization-status-name": status_value}
 
-        return await self.list(
+        return self.list(
             page=page,
             per_page=per_page,
             filter_params=filter_params,
@@ -95,7 +95,7 @@ class OrganizationsAPI(BaseAPI[Organization]):
             **kwargs,
         )
 
-    async def list_by_type(
+    def list_by_type(
         self,
         org_type: Union[OrganizationTypeEnum, str],
         page: Optional[int] = None,
@@ -124,7 +124,7 @@ class OrganizationsAPI(BaseAPI[Organization]):
 
         filter_params = {"organization-type-name": type_value}
 
-        return await self.list(
+        return self.list(
             page=page,
             per_page=per_page,
             filter_params=filter_params,
@@ -132,7 +132,7 @@ class OrganizationsAPI(BaseAPI[Organization]):
             **kwargs,
         )
 
-    async def get_active_organizations(
+    def get_active_organizations(
         self, page: Optional[int] = None, per_page: Optional[int] = None, **kwargs
     ) -> ITGlueResourceCollection[Organization]:
         """Get all active organizations.
@@ -145,11 +145,11 @@ class OrganizationsAPI(BaseAPI[Organization]):
         Returns:
             Collection of active organizations
         """
-        return await self.list_by_status(
+        return self.list_by_status(
             status=OrganizationStatus.ACTIVE, page=page, per_page=per_page, **kwargs
         )
 
-    async def get_client_organizations(
+    def get_client_organizations(
         self,
         active_only: bool = True,
         page: Optional[int] = None,
@@ -174,11 +174,11 @@ class OrganizationsAPI(BaseAPI[Organization]):
         if active_only:
             filter_params["organization-status-name"] = OrganizationStatus.ACTIVE.value
 
-        return await self.list(
+        return self.list(
             page=page, per_page=per_page, filter_params=filter_params, **kwargs
         )
 
-    async def get_internal_organizations(
+    def get_internal_organizations(
         self, page: Optional[int] = None, per_page: Optional[int] = None, **kwargs
     ) -> ITGlueResourceCollection[Organization]:
         """Get internal organizations.
@@ -191,14 +191,14 @@ class OrganizationsAPI(BaseAPI[Organization]):
         Returns:
             Collection of internal organizations
         """
-        return await self.list_by_type(
+        return self.list_by_type(
             org_type=OrganizationTypeEnum.INTERNAL,
             page=page,
             per_page=per_page,
             **kwargs,
         )
 
-    async def search_by_domain(
+    def search_by_domain(
         self,
         domain: str,
         page: Optional[int] = None,
@@ -220,11 +220,11 @@ class OrganizationsAPI(BaseAPI[Organization]):
 
         filter_params = {"primary-domain": domain}
 
-        return await self.list(
+        return self.list(
             page=page, per_page=per_page, filter_params=filter_params, **kwargs
         )
 
-    async def update_status(
+    def update_status(
         self, organization_id: str, status: Union[OrganizationStatus, str], **kwargs
     ) -> Organization:
         """Update organization status.
@@ -257,9 +257,9 @@ class OrganizationsAPI(BaseAPI[Organization]):
         update_data = {"organization_status_name": status_value}
         update_data.update(kwargs)
 
-        return await self.update(organization_id, update_data)
+        return self.update(organization_id, update_data)
 
-    async def create_organization(
+    def create_organization(
         self,
         name: str,
         organization_type: Union[OrganizationTypeEnum, str],
@@ -312,9 +312,9 @@ class OrganizationsAPI(BaseAPI[Organization]):
         # Add any additional attributes
         organization_data.update(kwargs)
 
-        return await self.create(organization_data)
+        return self.create(organization_data)
 
-    async def bulk_update_status(
+    def bulk_update_status(
         self, organization_ids: List[str], status: Union[OrganizationStatus, str]
     ) -> List[Organization]:
         """Update status for multiple organizations.
@@ -337,7 +337,7 @@ class OrganizationsAPI(BaseAPI[Organization]):
         updated_organizations = []
         for org_id in organization_ids:
             try:
-                updated_org = await self.update_status(org_id, status)
+                updated_org = self.update_status(org_id, status)
                 updated_organizations.append(updated_org)
             except Exception as e:
                 logger.error(f"Failed to update organization {org_id}: {e}")
@@ -348,7 +348,7 @@ class OrganizationsAPI(BaseAPI[Organization]):
         )
         return updated_organizations
 
-    async def get_organization_statistics(
+    def get_organization_statistics(
         self, include_inactive: bool = False
     ) -> Dict[str, Any]:
         """Get statistics about organizations.
@@ -365,9 +365,9 @@ class OrganizationsAPI(BaseAPI[Organization]):
 
         # Get all organizations (or just active ones)
         if include_inactive:
-            organizations = await self.list_all()
+            organizations = self.list_all()
         else:
-            organizations = await self.get_active_organizations()
+            organizations = self.get_active_organizations()
 
         stats["total"] = len(organizations.data)
 

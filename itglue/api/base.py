@@ -159,7 +159,7 @@ class BaseAPI(Generic[T]):
             logger.error(f"Failed to process {self.resource_type.value} response: {e}")
             raise ITGlueValidationError(f"Invalid response format: {e}")
 
-    async def get(
+    def get(
         self, resource_id: str, include: Optional[List[str]] = None, **kwargs
     ) -> T:
         """Get a single resource by ID.
@@ -182,7 +182,7 @@ class BaseAPI(Generic[T]):
         params = self._build_query_params(include=include, **kwargs)
 
         try:
-            response = await self.client.get(url, params=params)
+            response = self.client.get(url, params=params)
             return self._process_response(response, is_collection=False)
         except ITGlueAPIError as e:
             if e.status_code == 404:
@@ -191,7 +191,7 @@ class BaseAPI(Generic[T]):
                 )
             raise
 
-    async def list(
+    def list(
         self,
         page: Optional[int] = None,
         per_page: Optional[int] = None,
@@ -200,12 +200,12 @@ class BaseAPI(Generic[T]):
         include: Optional[List[str]] = None,
         **kwargs,
     ) -> ITGlueResourceCollection[T]:
-        """List resources with optional filtering and pagination.
+        """List resources with pagination.
 
         Args:
-            page: Page number for pagination
-            per_page: Number of items per page
-            sort: Sort field and direction (e.g., 'name', '-created_at')
+            page: Page number (1-based)
+            per_page: Number of items per page (default: client default)
+            sort: Sort field and direction (e.g., 'name', '-created-at')
             filter_params: Dictionary of filter parameters
             include: List of related resources to include
             **kwargs: Additional query parameters
@@ -225,10 +225,10 @@ class BaseAPI(Generic[T]):
             **kwargs,
         )
 
-        response = await self.client.get(url, params=params)
+        response = self.client.get(url, params=params)
         return self._process_response(response, is_collection=True)
 
-    async def list_all(
+    def list_all(
         self,
         per_page: Optional[int] = None,
         sort: Optional[str] = None,
@@ -259,14 +259,36 @@ class BaseAPI(Generic[T]):
             **kwargs,
         )
 
-        # Use pagination handler to get all pages
-        pagination_handler = PaginationHandler(self.client)
-        paginated_response = await pagination_handler.get_all_pages(url, params)
+        # Use pagination handler to get all pages - but synchronously
+        all_data = []
+        page = 1
+        while True:
+            page_params = params.copy()
+            page_params["page[number]"] = str(page)
+            
+            response = self.client.get(url, params=page_params)
+            if not response or "data" not in response:
+                break
+                
+            all_data.extend(response["data"])
+            
+            # Check if there are more pages
+            meta = response.get("meta", {})
+            if not meta.get("has-next-page", False):
+                break
+                
+            page += 1
 
-        # Process the aggregated response
-        return self._process_response(paginated_response.to_dict(), is_collection=True)
+        # Create a combined response
+        combined_response = {
+            "data": all_data,
+            "meta": {"total-count": len(all_data)},
+            "links": {}
+        }
+        
+        return self._process_response(combined_response, is_collection=True)
 
-    async def create(self, data: Union[T, Dict[str, Any]], **kwargs) -> T:
+    def create(self, data: Union[T, Dict[str, Any]], **kwargs) -> T:
         """Create a new resource.
 
         Args:
@@ -298,10 +320,10 @@ class BaseAPI(Generic[T]):
         url = self._build_url()
         params = self._build_query_params(**kwargs)
 
-        response = await self.client.post(url, json=request_data, params=params)
+        response = self.client.post(url, json_data=request_data, params=params)
         return self._process_response(response, is_collection=False)
 
-    async def update(
+    def update(
         self, resource_id: str, data: Union[T, Dict[str, Any]], **kwargs
     ) -> T:
         """Update an existing resource.
@@ -338,7 +360,7 @@ class BaseAPI(Generic[T]):
         params = self._build_query_params(**kwargs)
 
         try:
-            response = await self.client.patch(url, json=request_data, params=params)
+            response = self.client.patch(url, json_data=request_data, params=params)
             return self._process_response(response, is_collection=False)
         except ITGlueAPIError as e:
             if e.status_code == 404:
@@ -347,7 +369,7 @@ class BaseAPI(Generic[T]):
                 )
             raise
 
-    async def delete(self, resource_id: str, **kwargs) -> None:
+    def delete(self, resource_id: str, **kwargs) -> None:
         """Delete a resource.
 
         Args:
@@ -364,7 +386,7 @@ class BaseAPI(Generic[T]):
         params = self._build_query_params(**kwargs)
 
         try:
-            await self.client.delete(url, params=params)
+            self.client.delete(url, params=params)
             logger.info(
                 f"Successfully deleted {self.resource_type.value} {resource_id}"
             )
@@ -375,7 +397,7 @@ class BaseAPI(Generic[T]):
                 )
             raise
 
-    async def search(
+    def search(
         self,
         query: str,
         filter_params: Optional[Dict[str, Any]] = None,
@@ -401,7 +423,7 @@ class BaseAPI(Generic[T]):
         search_filters = filter_params or {}
         search_filters["name"] = query  # Most resources support name searching
 
-        return await self.list(
+        return self.list(
             page=page, per_page=per_page, filter_params=search_filters, **kwargs
         )
 

@@ -89,6 +89,16 @@ class MemoryCache(CacheBackend):
         """Set value in cache with optional TTL."""
         self._cleanup_expired()
 
+        # Check if we need to cleanup old entries due to size limit
+        if len(self.cache) >= self.max_size and key not in self.cache:
+            # Remove 20% of oldest entries
+            cleanup_count = max(1, int(self.max_size * 0.2))
+            oldest_keys = sorted(self.access_times.items(), key=lambda x: x[1])[:cleanup_count]
+            
+            for old_key, _ in oldest_keys:
+                self.cache.pop(old_key, None)
+                self.access_times.pop(old_key, None)
+
         entry = {"data": value}
 
         if ttl:

@@ -6,7 +6,7 @@ sharing controls, time-based operations, and analytics.
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, Mock, patch
 from datetime import datetime, timezone, timedelta
 
 from itglue.api.passwords import PasswordsAPI
@@ -112,18 +112,18 @@ class TestPasswordsAPIInitialization:
 class TestPasswordsAPISearch:
     """Test search and filtering operations."""
 
-    @pytest.mark.asyncio
-    async def test_search_passwords(
+    
+    def test_search_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test searching passwords by query."""
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[
                 Password.from_api_dict(sample_password_collection_data["data"][0])
             ]
         )
 
-        results = await passwords_api.search_passwords("Gmail", organization_id="456")
+        results = passwords_api.search_passwords("Gmail", organization_id="456")
 
         passwords_api.list.assert_called_once_with(
             params={"filter[name]": "Gmail", "filter[organization-id]": "456"}
@@ -131,17 +131,17 @@ class TestPasswordsAPISearch:
         assert len(results) == 1
         assert results[0].name == "Gmail"
 
-    @pytest.mark.asyncio
-    async def test_get_by_name_exact_match(
+    
+    def test_get_by_name_exact_match(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting password by exact name match."""
         password_data = sample_password_collection_data["data"][0]
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        result = await passwords_api.get_by_name("Gmail", organization_id="456")
+        result = passwords_api.get_by_name("Gmail", organization_id="456")
 
         passwords_api.list.assert_called_once_with(
             params={"filter[name]": "Gmail", "filter[organization-id]": "456"}
@@ -149,41 +149,41 @@ class TestPasswordsAPISearch:
         assert result is not None
         assert result.name == "Gmail"
 
-    @pytest.mark.asyncio
-    async def test_get_by_name_case_insensitive(
+    
+    def test_get_by_name_case_insensitive(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting password by name with case insensitive matching."""
         password_data = sample_password_collection_data["data"][0]
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        result = await passwords_api.get_by_name("gmail")  # lowercase
+        result = passwords_api.get_by_name("gmail")  # lowercase
 
         assert result is not None
         assert result.name == "Gmail"
 
-    @pytest.mark.asyncio
-    async def test_get_by_name_not_found(self, passwords_api):
+    
+    def test_get_by_name_not_found(self, passwords_api):
         """Test getting password by name when not found."""
-        passwords_api.list = AsyncMock(return_value=[])
+        passwords_api.list = Mock(return_value=[])
 
-        result = await passwords_api.get_by_name("NonExistent")
+        result = passwords_api.get_by_name("NonExistent")
 
         assert result is None
 
-    @pytest.mark.asyncio
-    async def test_search_by_username(
+    
+    def test_search_by_username(
         self, passwords_api, sample_password_collection_data
     ):
         """Test searching passwords by username."""
         password_data = sample_password_collection_data["data"][0]
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        results = await passwords_api.search_by_username(
+        results = passwords_api.search_by_username(
             "user1@example.com", organization_id="456"
         )
 
@@ -196,16 +196,16 @@ class TestPasswordsAPISearch:
         assert len(results) == 1
         assert results[0].username == "user1@example.com"
 
-    @pytest.mark.asyncio
-    async def test_search_by_url(self, passwords_api, sample_password_collection_data):
+    
+    def test_search_by_url(self, passwords_api, sample_password_collection_data):
         """Test searching passwords by URL."""
         password_data = sample_password_collection_data["data"][0]
         password_data["attributes"]["url"] = "https://gmail.com"
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        results = await passwords_api.search_by_url("gmail.com", organization_id="456")
+        results = passwords_api.search_by_url("gmail.com", organization_id="456")
 
         passwords_api.list.assert_called_once_with(
             params={"filter[url]": "gmail.com", "filter[organization-id]": "456"}
@@ -216,19 +216,19 @@ class TestPasswordsAPISearch:
 class TestPasswordsAPIOrganizationFiltering:
     """Test organization-based filtering."""
 
-    @pytest.mark.asyncio
-    async def test_get_organization_passwords(
+    
+    def test_get_organization_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting passwords for an organization."""
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[
                 Password.from_api_dict(data)
                 for data in sample_password_collection_data["data"]
             ]
         )
 
-        results = await passwords_api.get_organization_passwords(
+        results = passwords_api.get_organization_passwords(
             "456", include_archived=False
         )
 
@@ -237,19 +237,19 @@ class TestPasswordsAPIOrganizationFiltering:
         )
         assert len(results) == 2
 
-    @pytest.mark.asyncio
-    async def test_get_organization_passwords_include_archived(
+    
+    def test_get_organization_passwords_include_archived(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting organization passwords including archived."""
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[
                 Password.from_api_dict(data)
                 for data in sample_password_collection_data["data"]
             ]
         )
 
-        results = await passwords_api.get_organization_passwords(
+        results = passwords_api.get_organization_passwords(
             "456", include_archived=True
         )
 
@@ -262,17 +262,17 @@ class TestPasswordsAPIOrganizationFiltering:
 class TestPasswordsAPISecurityFiltering:
     """Test security and visibility filtering."""
 
-    @pytest.mark.asyncio
-    async def test_filter_by_category_enum(
+    
+    def test_filter_by_category_enum(
         self, passwords_api, sample_password_collection_data
     ):
         """Test filtering by password category using enum."""
         password_data = sample_password_collection_data["data"][1]  # critical password
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        results = await passwords_api.filter_by_category(
+        results = passwords_api.filter_by_category(
             PasswordCategory.CRITICAL, organization_id="456"
         )
 
@@ -285,34 +285,34 @@ class TestPasswordsAPISecurityFiltering:
         assert len(results) == 1
         assert results[0].password_category == PasswordCategory.CRITICAL
 
-    @pytest.mark.asyncio
-    async def test_filter_by_category_string(
+    
+    def test_filter_by_category_string(
         self, passwords_api, sample_password_collection_data
     ):
         """Test filtering by password category using string."""
         password_data = sample_password_collection_data["data"][0]  # high password
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        results = await passwords_api.filter_by_category("high")
+        results = passwords_api.filter_by_category("high")
 
         passwords_api.list.assert_called_once_with(
             params={"filter[password-category-name]": "high"}
         )
         assert len(results) == 1
 
-    @pytest.mark.asyncio
-    async def test_filter_by_visibility_enum(
+    
+    def test_filter_by_visibility_enum(
         self, passwords_api, sample_password_collection_data
     ):
         """Test filtering by visibility using enum."""
         password_data = sample_password_collection_data["data"][0]  # private password
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        results = await passwords_api.filter_by_visibility(
+        results = passwords_api.filter_by_visibility(
             PasswordVisibility.PRIVATE, organization_id="456"
         )
 
@@ -322,17 +322,17 @@ class TestPasswordsAPISecurityFiltering:
         assert len(results) == 1
         assert results[0].visibility == PasswordVisibility.PRIVATE
 
-    @pytest.mark.asyncio
-    async def test_filter_by_type_enum(
+    
+    def test_filter_by_type_enum(
         self, passwords_api, sample_password_collection_data
     ):
         """Test filtering by password type using enum."""
         password_data = sample_password_collection_data["data"][0]  # embedded password
-        passwords_api.list = AsyncMock(
+        passwords_api.list = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        results = await passwords_api.filter_by_type(PasswordType.EMBEDDED)
+        results = passwords_api.filter_by_type(PasswordType.EMBEDDED)
 
         passwords_api.list.assert_called_once_with(
             params={"filter[password-type]": "embedded"}
@@ -344,17 +344,17 @@ class TestPasswordsAPISecurityFiltering:
 class TestPasswordsAPISecurityMethods:
     """Test security-focused methods."""
 
-    @pytest.mark.asyncio
-    async def test_get_critical_passwords(
+    
+    def test_get_critical_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting critical passwords."""
         password_data = sample_password_collection_data["data"][1]  # critical password
-        passwords_api.filter_by_category = AsyncMock(
+        passwords_api.filter_by_category = Mock(
             return_value=[Password.from_api_dict(password_data)]
         )
 
-        results = await passwords_api.get_critical_passwords(organization_id="456")
+        results = passwords_api.get_critical_passwords(organization_id="456")
 
         passwords_api.filter_by_category.assert_called_once_with(
             PasswordCategory.CRITICAL, "456"
@@ -362,8 +362,8 @@ class TestPasswordsAPISecurityMethods:
         assert len(results) == 1
         assert results[0].password_category == PasswordCategory.CRITICAL
 
-    @pytest.mark.asyncio
-    async def test_get_high_security_passwords(
+    
+    def test_get_high_security_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting high security passwords."""
@@ -374,20 +374,20 @@ class TestPasswordsAPISecurityMethods:
             sample_password_collection_data["data"][1]
         )
 
-        passwords_api.filter_by_category = AsyncMock(
+        passwords_api.filter_by_category = Mock(
             side_effect=[
                 [high_password],  # high category call
                 [critical_password],  # critical category call
             ]
         )
 
-        results = await passwords_api.get_high_security_passwords(organization_id="456")
+        results = passwords_api.get_high_security_passwords(organization_id="456")
 
         assert passwords_api.filter_by_category.call_count == 2
         assert len(results) == 2  # Should include both high and critical
 
-    @pytest.mark.asyncio
-    async def test_get_high_security_passwords_deduplication(
+    
+    def test_get_high_security_passwords_deduplication(
         self, passwords_api, sample_password_collection_data
     ):
         """Test deduplication in high security passwords."""
@@ -396,19 +396,19 @@ class TestPasswordsAPISecurityMethods:
             sample_password_collection_data["data"][0]
         )
 
-        passwords_api.filter_by_category = AsyncMock(
+        passwords_api.filter_by_category = Mock(
             side_effect=[
                 [same_password],  # high category call
                 [same_password],  # critical category call (same password)
             ]
         )
 
-        results = await passwords_api.get_high_security_passwords()
+        results = passwords_api.get_high_security_passwords()
 
         assert len(results) == 1  # Should be deduplicated
 
-    @pytest.mark.asyncio
-    async def test_get_shared_passwords(
+    
+    def test_get_shared_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting shared passwords."""
@@ -416,7 +416,7 @@ class TestPasswordsAPISecurityMethods:
             sample_password_collection_data["data"][1]
         )  # organization visibility
 
-        passwords_api.filter_by_visibility = AsyncMock(
+        passwords_api.filter_by_visibility = Mock(
             side_effect=[
                 [],  # shared visibility
                 [shared_password],  # organization visibility
@@ -424,23 +424,23 @@ class TestPasswordsAPISecurityMethods:
             ]
         )
 
-        results = await passwords_api.get_shared_passwords(organization_id="456")
+        results = passwords_api.get_shared_passwords(organization_id="456")
 
         assert passwords_api.filter_by_visibility.call_count == 3
         assert len(results) == 1
         assert results[0].visibility == PasswordVisibility.ORGANIZATION
 
-    @pytest.mark.asyncio
-    async def test_get_private_passwords(
+    
+    def test_get_private_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting private passwords."""
         private_password = Password.from_api_dict(
             sample_password_collection_data["data"][0]
         )
-        passwords_api.filter_by_visibility = AsyncMock(return_value=[private_password])
+        passwords_api.filter_by_visibility = Mock(return_value=[private_password])
 
-        results = await passwords_api.get_private_passwords(organization_id="456")
+        results = passwords_api.get_private_passwords(organization_id="456")
 
         passwords_api.filter_by_visibility.assert_called_once_with(
             PasswordVisibility.PRIVATE, "456"
@@ -448,17 +448,17 @@ class TestPasswordsAPISecurityMethods:
         assert len(results) == 1
         assert results[0].visibility == PasswordVisibility.PRIVATE
 
-    @pytest.mark.asyncio
-    async def test_get_embedded_passwords(
+    
+    def test_get_embedded_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting embedded passwords."""
         embedded_password = Password.from_api_dict(
             sample_password_collection_data["data"][0]
         )
-        passwords_api.filter_by_type = AsyncMock(return_value=[embedded_password])
+        passwords_api.filter_by_type = Mock(return_value=[embedded_password])
 
-        results = await passwords_api.get_embedded_passwords(organization_id="456")
+        results = passwords_api.get_embedded_passwords(organization_id="456")
 
         passwords_api.filter_by_type.assert_called_once_with(
             PasswordType.EMBEDDED, "456"
@@ -466,17 +466,17 @@ class TestPasswordsAPISecurityMethods:
         assert len(results) == 1
         assert results[0].password_type == PasswordType.EMBEDDED
 
-    @pytest.mark.asyncio
-    async def test_get_linked_passwords(
+    
+    def test_get_linked_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting linked passwords."""
         linked_password = Password.from_api_dict(
             sample_password_collection_data["data"][1]
         )
-        passwords_api.filter_by_type = AsyncMock(return_value=[linked_password])
+        passwords_api.filter_by_type = Mock(return_value=[linked_password])
 
-        results = await passwords_api.get_linked_passwords(organization_id="456")
+        results = passwords_api.get_linked_passwords(organization_id="456")
 
         passwords_api.filter_by_type.assert_called_once_with(PasswordType.LINKED, "456")
         assert len(results) == 1
@@ -486,17 +486,17 @@ class TestPasswordsAPISecurityMethods:
 class TestPasswordsAPISpecialStates:
     """Test special state filtering methods."""
 
-    @pytest.mark.asyncio
-    async def test_get_favorite_passwords(
+    
+    def test_get_favorite_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting favorite passwords."""
         favorite_password = Password.from_api_dict(
             sample_password_collection_data["data"][0]
         )
-        passwords_api.list = AsyncMock(return_value=[favorite_password])
+        passwords_api.list = Mock(return_value=[favorite_password])
 
-        results = await passwords_api.get_favorite_passwords(organization_id="456")
+        results = passwords_api.get_favorite_passwords(organization_id="456")
 
         passwords_api.list.assert_called_once_with(
             params={"filter[favorite]": "true", "filter[organization-id]": "456"}
@@ -504,17 +504,17 @@ class TestPasswordsAPISpecialStates:
         assert len(results) == 1
         assert results[0].favorite is True
 
-    @pytest.mark.asyncio
-    async def test_get_archived_passwords(
+    
+    def test_get_archived_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting archived passwords."""
         archived_data = sample_password_collection_data["data"][0].copy()
         archived_data["attributes"]["archived"] = True
         archived_password = Password.from_api_dict(archived_data)
-        passwords_api.list = AsyncMock(return_value=[archived_password])
+        passwords_api.list = Mock(return_value=[archived_password])
 
-        results = await passwords_api.get_archived_passwords(organization_id="456")
+        results = passwords_api.get_archived_passwords(organization_id="456")
 
         passwords_api.list.assert_called_once_with(
             params={"filter[archived]": "true", "filter[organization-id]": "456"}
@@ -522,17 +522,17 @@ class TestPasswordsAPISpecialStates:
         assert len(results) == 1
         assert results[0].archived is True
 
-    @pytest.mark.asyncio
-    async def test_get_active_passwords(
+    
+    def test_get_active_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting active passwords."""
         active_password = Password.from_api_dict(
             sample_password_collection_data["data"][0]
         )
-        passwords_api.list = AsyncMock(return_value=[active_password])
+        passwords_api.list = Mock(return_value=[active_password])
 
-        results = await passwords_api.get_active_passwords(organization_id="456")
+        results = passwords_api.get_active_passwords(organization_id="456")
 
         passwords_api.list.assert_called_once_with(
             params={"filter[archived]": "false", "filter[organization-id]": "456"}
@@ -544,17 +544,17 @@ class TestPasswordsAPISpecialStates:
 class TestPasswordsAPITimeFiltering:
     """Test time-based filtering methods."""
 
-    @pytest.mark.asyncio
-    async def test_get_recently_updated_passwords(
+    
+    def test_get_recently_updated_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting recently updated passwords."""
         recent_password = Password.from_api_dict(
             sample_password_collection_data["data"][0]
         )
-        passwords_api.list = AsyncMock(return_value=[recent_password])
+        passwords_api.list = Mock(return_value=[recent_password])
 
-        results = await passwords_api.get_recently_updated_passwords(
+        results = passwords_api.get_recently_updated_passwords(
             30, organization_id="456"
         )
 
@@ -566,17 +566,17 @@ class TestPasswordsAPITimeFiltering:
         # Verify that the date filter contains an ISO date string
         assert "T" in call_args["filter[updated-at][gt]"]  # ISO format check
 
-    @pytest.mark.asyncio
-    async def test_get_stale_passwords(
+    
+    def test_get_stale_passwords(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting stale passwords."""
         stale_password = Password.from_api_dict(
             sample_password_collection_data["data"][0]
         )
-        passwords_api.list = AsyncMock(return_value=[stale_password])
+        passwords_api.list = Mock(return_value=[stale_password])
 
-        results = await passwords_api.get_stale_passwords(90, organization_id="456")
+        results = passwords_api.get_stale_passwords(90, organization_id="456")
 
         # Check that the filter was called with the right parameters
         call_args = passwords_api.list.call_args.kwargs["params"]
@@ -590,14 +590,14 @@ class TestPasswordsAPITimeFiltering:
 class TestPasswordsAPIManagement:
     """Test password management operations."""
 
-    @pytest.mark.asyncio
-    async def test_create_password(self, passwords_api, sample_password_data):
+    
+    def test_create_password(self, passwords_api, sample_password_data):
         """Test creating a new password."""
-        passwords_api.create = AsyncMock(
+        passwords_api.create = Mock(
             return_value=Password.from_api_dict(sample_password_data)
         )
 
-        result = await passwords_api.create_password(
+        result = passwords_api.create_password(
             name="Gmail Account",
             username="user@example.com",
             password="secure123",
@@ -630,16 +630,16 @@ class TestPasswordsAPIManagement:
 
         assert result.name == "Gmail Account"
 
-    @pytest.mark.asyncio
-    async def test_create_password_with_string_enums(
+    
+    def test_create_password_with_string_enums(
         self, passwords_api, sample_password_data
     ):
         """Test creating password with string enum values."""
-        passwords_api.create = AsyncMock(
+        passwords_api.create = Mock(
             return_value=Password.from_api_dict(sample_password_data)
         )
 
-        result = await passwords_api.create_password(
+        result = passwords_api.create_password(
             name="Test Password",
             username="test@example.com",
             password="test123",
@@ -654,14 +654,14 @@ class TestPasswordsAPIManagement:
         assert call_args["attributes"]["password-category-name"] == "critical"
         assert call_args["attributes"]["visibility"] == "everyone"
 
-    @pytest.mark.asyncio
-    async def test_update_password_value(self, passwords_api, sample_password_data):
+    
+    def test_update_password_value(self, passwords_api, sample_password_data):
         """Test updating password value."""
-        passwords_api.update = AsyncMock(
+        passwords_api.update = Mock(
             return_value=Password.from_api_dict(sample_password_data)
         )
 
-        result = await passwords_api.update_password_value("123", "newpassword")
+        result = passwords_api.update_password_value("123", "newpassword")
 
         call_args = passwords_api.update.call_args
         assert call_args[0][0] == "123"  # password_id
@@ -670,16 +670,16 @@ class TestPasswordsAPIManagement:
         assert update_data["type"] == ResourceType.PASSWORDS.value
         assert update_data["attributes"]["password"] == "newpassword"
 
-    @pytest.mark.asyncio
-    async def test_update_password_visibility(
+    
+    def test_update_password_visibility(
         self, passwords_api, sample_password_data
     ):
         """Test updating password visibility."""
-        passwords_api.update = AsyncMock(
+        passwords_api.update = Mock(
             return_value=Password.from_api_dict(sample_password_data)
         )
 
-        result = await passwords_api.update_password_visibility(
+        result = passwords_api.update_password_visibility(
             "123", PasswordVisibility.EVERYONE
         )
 
@@ -689,14 +689,14 @@ class TestPasswordsAPIManagement:
         update_data = call_args[0][1]
         assert update_data["attributes"]["visibility"] == "everyone"
 
-    @pytest.mark.asyncio
-    async def test_update_password_category(self, passwords_api, sample_password_data):
+    
+    def test_update_password_category(self, passwords_api, sample_password_data):
         """Test updating password security category."""
-        passwords_api.update = AsyncMock(
+        passwords_api.update = Mock(
             return_value=Password.from_api_dict(sample_password_data)
         )
 
-        result = await passwords_api.update_password_category("123", "critical")
+        result = passwords_api.update_password_category("123", "critical")
 
         call_args = passwords_api.update.call_args
         assert call_args[0][0] == "123"
@@ -704,8 +704,8 @@ class TestPasswordsAPIManagement:
         update_data = call_args[0][1]
         assert update_data["attributes"]["password-category-name"] == "critical"
 
-    @pytest.mark.asyncio
-    async def test_toggle_favorite(self, passwords_api, sample_password_data):
+    
+    def test_toggle_favorite(self, passwords_api, sample_password_data):
         """Test toggling password favorite status."""
         # Mock current password state
         current_password = Password.from_api_dict(sample_password_data)
@@ -715,10 +715,10 @@ class TestPasswordsAPIManagement:
         updated_data["attributes"]["favorite"] = False
         updated_password = Password.from_api_dict(updated_data)
 
-        passwords_api.get = AsyncMock(return_value=current_password)
-        passwords_api.update = AsyncMock(return_value=updated_password)
+        passwords_api.get = Mock(return_value=current_password)
+        passwords_api.update = Mock(return_value=updated_password)
 
-        result = await passwords_api.toggle_favorite("123")
+        result = passwords_api.toggle_favorite("123")
 
         # Should have called get to check current state
         passwords_api.get.assert_called_once_with("123")
@@ -728,27 +728,27 @@ class TestPasswordsAPIManagement:
         update_data = call_args[0][1]
         assert update_data["attributes"]["favorite"] is False  # Toggled from True
 
-    @pytest.mark.asyncio
-    async def test_archive_password(self, passwords_api, sample_password_data):
+    
+    def test_archive_password(self, passwords_api, sample_password_data):
         """Test archiving a password."""
-        passwords_api.update = AsyncMock(
+        passwords_api.update = Mock(
             return_value=Password.from_api_dict(sample_password_data)
         )
 
-        result = await passwords_api.archive_password("123")
+        result = passwords_api.archive_password("123")
 
         call_args = passwords_api.update.call_args
         update_data = call_args[0][1]
         assert update_data["attributes"]["archived"] is True
 
-    @pytest.mark.asyncio
-    async def test_unarchive_password(self, passwords_api, sample_password_data):
+    
+    def test_unarchive_password(self, passwords_api, sample_password_data):
         """Test unarchiving a password."""
-        passwords_api.update = AsyncMock(
+        passwords_api.update = Mock(
             return_value=Password.from_api_dict(sample_password_data)
         )
 
-        result = await passwords_api.unarchive_password("123")
+        result = passwords_api.unarchive_password("123")
 
         call_args = passwords_api.update.call_args
         update_data = call_args[0][1]
@@ -758,20 +758,20 @@ class TestPasswordsAPIManagement:
 class TestPasswordsAPIAnalytics:
     """Test analytics and reporting methods."""
 
-    @pytest.mark.asyncio
-    async def test_get_password_statistics_empty(self, passwords_api):
+    
+    def test_get_password_statistics_empty(self, passwords_api):
         """Test getting statistics for empty password collection."""
-        passwords_api.get_active_passwords = AsyncMock(return_value=[])
+        passwords_api.get_active_passwords = Mock(return_value=[])
 
-        stats = await passwords_api.get_password_statistics(organization_id="456")
+        stats = passwords_api.get_password_statistics(organization_id="456")
 
         assert stats["total_passwords"] == 0
         assert stats["active_passwords"] == 0
         assert stats["archived_passwords"] == 0
         assert stats["critical_passwords"] == 0
 
-    @pytest.mark.asyncio
-    async def test_get_password_statistics(
+    
+    def test_get_password_statistics(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting comprehensive password statistics."""
@@ -781,12 +781,12 @@ class TestPasswordsAPIAnalytics:
         ]
         archived_passwords = []
 
-        passwords_api.get_active_passwords = AsyncMock(return_value=active_passwords)
-        passwords_api.get_archived_passwords = AsyncMock(
+        passwords_api.get_active_passwords = Mock(return_value=active_passwords)
+        passwords_api.get_archived_passwords = Mock(
             return_value=archived_passwords
         )
 
-        stats = await passwords_api.get_password_statistics(organization_id="456")
+        stats = passwords_api.get_password_statistics(organization_id="456")
 
         assert stats["total_passwords"] == 2  # active + archived
         assert stats["active_passwords"] == 2
@@ -804,8 +804,8 @@ class TestPasswordsAPIAnalytics:
         assert "visibility_distribution" in stats
         assert "type_distribution" in stats
 
-    @pytest.mark.asyncio
-    async def test_get_organization_password_report(
+    
+    def test_get_organization_password_report(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting comprehensive organization password report."""
@@ -815,7 +815,7 @@ class TestPasswordsAPIAnalytics:
         ]
 
         # Mock all the required method calls
-        passwords_api.get_password_statistics = AsyncMock(
+        passwords_api.get_password_statistics = Mock(
             return_value={
                 "total_passwords": 2,
                 "active_passwords": 2,
@@ -830,12 +830,12 @@ class TestPasswordsAPIAnalytics:
                 },
             }
         )
-        passwords_api.get_stale_passwords = AsyncMock(return_value=[])
-        passwords_api.get_recently_updated_passwords = AsyncMock(
+        passwords_api.get_stale_passwords = Mock(return_value=[])
+        passwords_api.get_recently_updated_passwords = Mock(
             return_value=active_passwords
         )
 
-        report = await passwords_api.get_organization_password_report("456")
+        report = passwords_api.get_organization_password_report("456")
 
         # Verify method calls
         passwords_api.get_password_statistics.assert_called_once_with("456")

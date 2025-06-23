@@ -1,7 +1,7 @@
 """Tests for the base API resource class."""
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, Mock, patch
 from typing import Dict, Any
 
 from itglue.api.base import BaseAPI
@@ -224,11 +224,10 @@ class TestResponseProcessing:
                 test_api._process_response(response_data, is_collection=False)
 
 
-@pytest.mark.asyncio
 class TestAPIOperations:
     """Test CRUD operations."""
 
-    async def test_get_resource(self, test_api, mock_http_client):
+    def test_get_resource(self, test_api, mock_http_client):
         """Test getting a single resource."""
         response_data = {
             "data": {
@@ -237,13 +236,13 @@ class TestAPIOperations:
                 "attributes": {"name": "Test Org"},
             }
         }
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(test_api, "_process_response") as mock_process:
             mock_resource = MockTestResource(id="123")
             mock_process.return_value = mock_resource
 
-            result = await test_api.get("123")
+            result = test_api.get("123")
 
             assert result == mock_resource
             mock_http_client.get.assert_called_once_with(
@@ -251,39 +250,39 @@ class TestAPIOperations:
             )
             mock_process.assert_called_once_with(response_data, is_collection=False)
 
-    async def test_get_resource_with_include(self, test_api, mock_http_client):
+    def test_get_resource_with_include(self, test_api, mock_http_client):
         """Test getting resource with includes."""
         response_data = {"data": {"type": "organizations", "id": "123"}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(test_api, "_process_response") as mock_process:
             mock_resource = MockTestResource(id="123")
             mock_process.return_value = mock_resource
 
-            await test_api.get("123", include=["relationships"])
+            test_api.get("123", include=["relationships"])
 
             expected_params = {"include": "relationships"}
             mock_http_client.get.assert_called_once_with(
                 "/test-resources/123", params=expected_params
             )
 
-    async def test_get_resource_not_found(self, test_api, mock_http_client):
+    def test_get_resource_not_found(self, test_api, mock_http_client):
         """Test getting non-existent resource raises not found error."""
-        mock_http_client.get = AsyncMock(side_effect=ITGlueAPIError("Not found", 404))
+        mock_http_client.get = Mock(side_effect=ITGlueAPIError("Not found", 404))
 
         with pytest.raises(ITGlueNotFoundError, match="Organizations 123 not found"):
-            await test_api.get("123")
+            test_api.get("123")
 
-    async def test_list_resources(self, test_api, mock_http_client):
+    def test_list_resources(self, test_api, mock_http_client):
         """Test listing resources."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(test_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
-            result = await test_api.list(page=1, per_page=10)
+            result = test_api.list(page=1, per_page=10)
 
             assert result == mock_collection
             expected_params = {"page[number]": "1", "page[size]": "10"}
@@ -292,7 +291,7 @@ class TestAPIOperations:
             )
             mock_process.assert_called_once_with(response_data, is_collection=True)
 
-    async def test_create_resource(self, test_api, mock_http_client):
+    def test_create_resource(self, test_api, mock_http_client):
         """Test creating a resource."""
         response_data = {
             "data": {
@@ -301,14 +300,14 @@ class TestAPIOperations:
                 "attributes": {"name": "New Org"},
             }
         }
-        mock_http_client.post = AsyncMock(return_value=response_data)
+        mock_http_client.post = Mock(return_value=response_data)
 
         with patch.object(test_api, "_process_response") as mock_process:
             mock_resource = MockTestResource(id="123")
             mock_process.return_value = mock_resource
 
             data = {"name": "New Org"}
-            result = await test_api.create(data)
+            result = test_api.create(data)
 
             assert result == mock_resource
             # Verify the data was converted to API format
@@ -316,7 +315,7 @@ class TestAPIOperations:
             call_args = mock_http_client.post.call_args
             assert call_args[0][0] == "/test-resources"
 
-    async def test_update_resource(self, test_api, mock_http_client):
+    def test_update_resource(self, test_api, mock_http_client):
         """Test updating a resource."""
         response_data = {
             "data": {
@@ -325,49 +324,49 @@ class TestAPIOperations:
                 "attributes": {"name": "Updated Org"},
             }
         }
-        mock_http_client.patch = AsyncMock(return_value=response_data)
+        mock_http_client.patch = Mock(return_value=response_data)
 
         with patch.object(test_api, "_process_response") as mock_process:
             mock_resource = MockTestResource(id="123")
             mock_process.return_value = mock_resource
 
             data = {"name": "Updated Org"}
-            result = await test_api.update("123", data)
+            result = test_api.update("123", data)
 
             assert result == mock_resource
             mock_http_client.patch.assert_called_once()
             call_args = mock_http_client.patch.call_args
             assert call_args[0][0] == "/test-resources/123"
 
-    async def test_delete_resource(self, test_api, mock_http_client):
+    def test_delete_resource(self, test_api, mock_http_client):
         """Test deleting a resource."""
-        mock_http_client.delete = AsyncMock(return_value=None)
+        mock_http_client.delete = Mock(return_value=None)
 
-        await test_api.delete("123")
+        test_api.delete("123")
 
         mock_http_client.delete.assert_called_once_with(
             "/test-resources/123", params={}
         )
 
-    async def test_delete_resource_not_found(self, test_api, mock_http_client):
+    def test_delete_resource_not_found(self, test_api, mock_http_client):
         """Test deleting non-existent resource raises not found error."""
-        mock_http_client.delete = AsyncMock(
+        mock_http_client.delete = Mock(
             side_effect=ITGlueAPIError("Not found", 404)
         )
 
         with pytest.raises(ITGlueNotFoundError, match="Organizations 123 not found"):
-            await test_api.delete("123")
+            test_api.delete("123")
 
-    async def test_search_resources(self, test_api, mock_http_client):
+    def test_search_resources(self, test_api, mock_http_client):
         """Test searching resources."""
         response_data = {"data": [], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(test_api, "_process_response") as mock_process:
             mock_collection = ITGlueResourceCollection(data=[])
             mock_process.return_value = mock_collection
 
-            result = await test_api.search("test query")
+            result = test_api.search("test query")
 
             assert result == mock_collection
             expected_params = {"filter[name]": "test query"}

@@ -1,7 +1,7 @@
 """Tests for the Organizations API resource class."""
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 from typing import Dict, Any
 
 from itglue.api.organizations import OrganizationsAPI
@@ -64,23 +64,22 @@ class TestOrganizationsAPIInitialization:
         assert api.base_url == "/organizations"
 
 
-@pytest.mark.asyncio
 class TestOrganizationsAPISpecializedMethods:
     """Test specialized methods for organizations."""
 
-    async def test_get_by_name_exact_match(
+    def test_get_by_name_exact_match(
         self, organizations_api, mock_http_client, sample_organization_data
     ):
         """Test getting organization by exact name."""
         response_data = {"data": [sample_organization_data], "meta": {}}
-        mock_http_client.get = AsyncMock(return_value=response_data)
+        mock_http_client.get = Mock(return_value=response_data)
 
         with patch.object(organizations_api, "_process_response") as mock_process:
             mock_org = Organization.from_api_dict(sample_organization_data)
             mock_collection = ITGlueResourceCollection(data=[mock_org])
             mock_process.return_value = mock_collection
 
-            result = await organizations_api.get_by_name(
+            result = organizations_api.get_by_name(
                 "Test Organization", exact_match=True
             )
 
@@ -90,41 +89,41 @@ class TestOrganizationsAPISpecializedMethods:
                 "/organizations", params=expected_params
             )
 
-    async def test_update_status_with_enum(
+    def test_update_status_with_enum(
         self, organizations_api, mock_http_client, sample_organization_data
     ):
         """Test updating organization status with enum."""
         response_data = {"data": sample_organization_data}
-        mock_http_client.patch = AsyncMock(return_value=response_data)
+        mock_http_client.patch = Mock(return_value=response_data)
 
         with patch.object(organizations_api, "_process_response") as mock_process:
             mock_org = Organization.from_api_dict(sample_organization_data)
             mock_process.return_value = mock_org
 
-            result = await organizations_api.update_status(
+            result = organizations_api.update_status(
                 "123", OrganizationStatus.INACTIVE
             )
 
             assert result == mock_org
             mock_http_client.patch.assert_called_once()
 
-    async def test_update_status_invalid(self, organizations_api):
+    def test_update_status_invalid(self, organizations_api):
         """Test updating organization status with invalid value."""
         with pytest.raises(ITGlueValidationError, match="Invalid organization status"):
-            await organizations_api.update_status("123", "InvalidStatus")
+            organizations_api.update_status("123", "InvalidStatus")
 
-    async def test_create_organization_with_enum(
+    def test_create_organization_with_enum(
         self, organizations_api, mock_http_client, sample_organization_data
     ):
         """Test creating organization with enum type."""
         response_data = {"data": sample_organization_data}
-        mock_http_client.post = AsyncMock(return_value=response_data)
+        mock_http_client.post = Mock(return_value=response_data)
 
         with patch.object(organizations_api, "_process_response") as mock_process:
             mock_org = Organization.from_api_dict(sample_organization_data)
             mock_process.return_value = mock_org
 
-            result = await organizations_api.create_organization(
+            result = organizations_api.create_organization(
                 name="Test Organization",
                 organization_type=OrganizationTypeEnum.CLIENT,
                 description="Test description",
@@ -133,9 +132,9 @@ class TestOrganizationsAPISpecializedMethods:
             assert result == mock_org
             mock_http_client.post.assert_called_once()
 
-    async def test_create_organization_invalid_type(self, organizations_api):
+    def test_create_organization_invalid_type(self, organizations_api):
         """Test creating organization with invalid type."""
         with pytest.raises(ITGlueValidationError, match="Invalid organization type"):
-            await organizations_api.create_organization(
+            organizations_api.create_organization(
                 name="Test Organization", organization_type="InvalidType"
             )
