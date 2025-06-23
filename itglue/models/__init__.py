@@ -23,6 +23,17 @@ from .common import (
 )
 from .organization import Organization, OrganizationCollection, OrganizationStatus, OrganizationTypeEnum
 from .configuration import Configuration, ConfigurationCollection, ConfigurationStatus
+from .flexible_asset import (
+    FlexibleAsset, 
+    FlexibleAssetCollection,
+    FlexibleAssetType,
+    FlexibleAssetTypeCollection,
+    FlexibleAssetField,
+    FlexibleAssetFieldCollection,
+    FlexibleAssetStatus
+)
+from .user import User, UserCollection, UserRole, UserStatus
+from .password import Password, PasswordCollection, PasswordType, PasswordCategory, PasswordVisibility
 
 __all__ = [
     # Base models
@@ -49,4 +60,20 @@ __all__ = [
     "Configuration",
     "ConfigurationCollection", 
     "ConfigurationStatus",
+    "FlexibleAsset",
+    "FlexibleAssetCollection",
+    "FlexibleAssetType",
+    "FlexibleAssetTypeCollection",
+    "FlexibleAssetField",
+    "FlexibleAssetFieldCollection",
+    "FlexibleAssetStatus",
+    "User",
+    "UserCollection", 
+    "UserRole",
+    "UserStatus",
+    "Password",
+    "PasswordCollection",
+    "PasswordType",
+    "PasswordCategory",
+    "PasswordVisibility",
 ] 

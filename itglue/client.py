@@ -12,6 +12,11 @@ from .config import ITGlueConfig
 from .http_client import ITGlueHTTPClient
 from .pagination import PaginationHandler, PaginatedResponse
 from .cache import CacheManager
+from .api.organizations import OrganizationsAPI
+from .api.configurations import ConfigurationsAPI
+from .api.flexible_assets import FlexibleAssetsAPI, FlexibleAssetTypesAPI, FlexibleAssetFieldsAPI
+from .api.users import UsersAPI
+from .api.passwords import PasswordsAPI
 
 
 class ITGlueClient:
@@ -31,6 +36,15 @@ class ITGlueClient:
         self.http_client = ITGlueHTTPClient(self.config)
         self.pagination = PaginationHandler(self.http_client)
         self.cache = CacheManager(self.config)
+        
+        # Initialize API resource endpoints
+        self.organizations = OrganizationsAPI(self.http_client)
+        self.configurations = ConfigurationsAPI(self.http_client)
+        self.flexible_assets = FlexibleAssetsAPI(self.http_client)
+        self.flexible_asset_types = FlexibleAssetTypesAPI(self.http_client)
+        self.flexible_asset_fields = FlexibleAssetFieldsAPI(self.http_client)
+        self.users = UsersAPI(self.http_client)
+        self.passwords = PasswordsAPI(self.http_client)
         
         self.logger.info(
             "ITGlue client initialized",

@@ -63,6 +63,28 @@ config_data = {
     "configuration_status_id": 1
 }
 new_config = client.configurations.create(config_data)
+
+# Work with flexible assets
+flexible_assets = client.flexible_assets.list(per_page=10)
+print(f"Found {len(flexible_assets)} flexible assets")
+
+# Get flexible asset types
+asset_types = client.flexible_asset_types.get_enabled_types()
+for asset_type in asset_types:
+    print(f"Type: {asset_type.name}")
+
+# Create a flexible asset
+asset = client.flexible_assets.create_flexible_asset(
+    name="Production Database",
+    flexible_asset_type_name="Databases",
+    organization_id=123,
+    traits={
+        "server_name": "db-prod-01",
+        "database_engine": "PostgreSQL",
+        "version": "14.2"
+    },
+    tag_list=["production", "critical"]
+)
 ```
 
 ## Configuration
@@ -110,8 +132,11 @@ client = ITGlueClient(config)
 - Category-based organization
 
 ### Flexible Assets
-- Custom data structures
-- Dynamic field support
+- Custom data structures beyond standard ITGlue resources
+- Dynamic traits and field management
+- Tag-based organization and search
+- Status lifecycle management
+- Flexible asset type definitions with custom fields
 
 ### Contacts
 - People and contact management

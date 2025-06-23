@@ -8,6 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+## [0.2.0] - 2025-06-23
+
+### Added
+- **Phase 2.3 - Passwords API Implementation** (2025-06-23)
+  - Complete Passwords API with 20+ specialized methods for enterprise password management
+  - Password model with security-focused design (PasswordType, PasswordCategory, PasswordVisibility enums)
+  - Advanced security analysis methods (is_critical, is_high_security, is_shared, is_stale)
+  - Comprehensive search and filtering (by name, username, URL, organization, category, visibility)
+  - Time-based operations (recently updated, stale password detection)
+  - Management operations (create, update, archive, favorite management, visibility control)
+  - Password analytics and organizational reporting (security statistics, distribution analysis)
+  - Property setters with automatic API attribute mapping (snake_case to hyphen-case)
+  - PasswordCollection with advanced filtering and security analytics
+  - 64 comprehensive tests (27 model + 36 API tests, 100% pass rate)
+  - Client integration with passwords endpoint
+  - Total test suite: 411 tests passing
+- **Phase 2.2 - Users API Implementation** (2025-06-23)
+  - Complete Users API with 15+ methods for user management and analytics
+  - User model with role-based design (UserRole, UserStatus enums)
+  - User management methods (role checking, reputation analysis, authentication status)
+  - Advanced search and filtering (by email, name, role, reputation, authentication status)
+  - User statistics and analytics (role distribution, reputation analysis, authentication reporting)
+  - Property setters with automatic API attribute mapping
+  - UserCollection with comprehensive filtering and search capabilities
+  - 54 comprehensive tests (27 model + 27 API tests, 100% pass rate)
+  - Client integration with users endpoint
+- **Phase 2.1 - Flexible Assets Implementation** (2025-06-23)
+  - Complete Flexible Assets API with 14+ specialized methods
+  - Flexible Asset Types API for managing custom asset definitions
+  - Flexible Asset Fields API for field configuration
+  - Flexible asset model with dynamic traits and tag management
+  - Support for custom data structures beyond standard ITGlue resources
+  - Property setters with automatic attribute mapping (snake_case to hyphen-case)
+  - Tag management methods (add_tag, remove_tag, has_tag)
+  - Trait management for custom field values
+  - Status management for flexible asset lifecycle
+  - 47 comprehensive tests (100% pass rate)
+  - Client integration with flexible_assets, flexible_asset_types, and flexible_asset_fields endpoints
+  - Total test suite: 293 tests passing
 - **Phase 1.2 - Core SDK Architecture** (2025-06-20)
   - HTTP client with authentication, rate limiting, and retry logic
   - Comprehensive error handling with custom exception hierarchy

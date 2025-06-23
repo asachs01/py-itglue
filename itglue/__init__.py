@@ -31,6 +31,20 @@ from .models import (
     OrganizationCollection,
     Configuration,
     ConfigurationCollection,
+    FlexibleAsset,
+    FlexibleAssetCollection,
+    FlexibleAssetType,
+    FlexibleAssetTypeCollection,
+    FlexibleAssetField,
+    FlexibleAssetFieldCollection,
+    FlexibleAssetStatus,
+)
+from .api import (
+    OrganizationsAPI,
+    ConfigurationsAPI,
+    FlexibleAssetsAPI,
+    FlexibleAssetTypesAPI,
+    FlexibleAssetFieldsAPI,
 )
 
 __all__ = [
@@ -61,4 +75,17 @@ __all__ = [
     "OrganizationCollection",
     "Configuration",
     "ConfigurationCollection",
+    "FlexibleAsset",
+    "FlexibleAssetCollection",
+    "FlexibleAssetType",
+    "FlexibleAssetTypeCollection", 
+    "FlexibleAssetField",
+    "FlexibleAssetFieldCollection",
+    "FlexibleAssetStatus",
+    # API Resources
+    "OrganizationsAPI",
+    "ConfigurationsAPI",
+    "FlexibleAssetsAPI",
+    "FlexibleAssetTypesAPI",
+    "FlexibleAssetFieldsAPI",
 ] 

@@ -59,6 +59,7 @@ class ResourceType(str, Enum):
     # System
     ACTIVITY_LOGS = "activity_logs"
     WEBHOOKS = "webhooks"
+    ATTACHMENTS = "attachments"
     
     # Resource types (type references)
     ORGANIZATION_TYPES = "organization-types"
