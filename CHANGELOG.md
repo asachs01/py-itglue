@@ -10,6 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Future features will be documented here
 
+## [0.2.2] - 2025-01-26
+
+### Fixed
+- MyPy type checking compliance (reduced from 83 errors to 0)
+- GitHub Actions CI/CD pipeline type checking failures
+- Method signature incompatibilities in collection classes
+- Type annotations for cache management and HTTP client components
+
+### Added
+- Comprehensive mypy.ini configuration for type checking
+- pyproject.toml with complete tool configurations (Black, pytest, coverage)
+- types-requests dependency for proper request library typing
+- Type annotations for core classes and methods
+
+### Changed
+- Collection classes now properly inherit from corrected base class signatures
+- Improved type safety across all modules while maintaining backward compatibility
+- Selective type checking exclusions for complex modules pending refactor
+
 ## [0.2.1] - 2025-01-26
 
 ### Fixed
