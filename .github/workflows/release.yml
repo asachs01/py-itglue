@@ -1,0 +1,180 @@
+name: Release to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'testpypi'
+        type: choice
+        options:
+          - testpypi
+          - pypi
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Extract version from tag
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+        echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+    
+    - name: Verify version consistency
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        PACKAGE_VERSION=$(python -c "from itglue.version import __version__; print(__version__)")
+        echo "Package version: $PACKAGE_VERSION"
+        echo "Tag version: $VERSION"
+        if [ "$PACKAGE_VERSION" != "$VERSION" ]; then
+          echo "Version mismatch: package version ($PACKAGE_VERSION) != tag version ($VERSION)"
+          exit 1
+        fi
+    
+    - name: Build package
+      run: |
+        python -m build
+    
+    - name: Check distribution
+      run: |
+        twine check dist/*
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev,testing]
+    
+    - name: Run tests
+      run: |
+        pytest tests/ -v --cov=itglue
+    
+    - name: Verify package can be imported
+      run: |
+        python -c "import itglue; print(f'Successfully imported itglue v{itglue.__version__}')"
+
+  deploy-testpypi:
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    if: |
+      (startsWith(github.ref, 'refs/tags/') && contains(github.ref, '-')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'testpypi')
+
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+    
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        skip-existing: true
+
+  deploy-pypi:
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    if: |
+      (startsWith(github.ref, 'refs/tags/') && !contains(github.ref, '-')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'pypi')
+
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+    
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+  create-github-release:
+    runs-on: ubuntu-latest
+    needs: [deploy-pypi]
+    if: startsWith(github.ref, 'refs/tags/') && !contains(github.ref, '-')
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        VERSION=${TAG_NAME#v}
+        
+        # Extract changelog section for this version
+        CHANGELOG_SECTION=$(awk "/^## \[$VERSION\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md)
+        
+        # Create release notes
+        cat > release_notes.md << EOF
+        # $TAG_NAME Release Notes
+        
+        $CHANGELOG_SECTION
+        
+        ## Installation
+        
+        \`\`\`bash
+        pip install py-itglue==$VERSION
+        \`\`\`
+        
+        ## What's Changed
+        See the [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed changes.
+        
+        **Full Changelog**: https://github.com/${{ github.repository }}/compare/v$(git describe --tags --abbrev=0 HEAD^)...$TAG_NAME
+        EOF
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body_path: release_notes.md
+        files: |
+          dist/*
+        generate_release_notes: true
+
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

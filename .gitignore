@@ -148,4 +148,27 @@ performance_reports/
 
 # Cache directories
 .cache/
-cache/ 
+cache/
+
+# GitHub Actions artifacts
+bandit-report.json
+safety-report.json
+semgrep-report.json
+release_notes.md
+
+# Pre-commit
+.pre-commit-config.yaml.backup
+
+# Build artifacts (additional)
+*.whl
+*.tar.gz
+build-report.txt
+twine-check.log
+
+# Security scan results
+.security/
+security-reports/
+
+# Performance test results
+benchmark-results.json
+performance-*.log 

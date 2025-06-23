@@ -1,0 +1,163 @@
+name: Scheduled Tests
+
+on:
+  schedule:
+    # Run every Monday at 9:00 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  comprehensive-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev,testing,performance]
+    
+    - name: Run comprehensive tests
+      run: |
+        pytest tests/ -v --cov=itglue --cov-report=xml --cov-report=term-missing --durations=10
+    
+    - name: Performance benchmarks
+      run: |
+        python -c "
+        import time
+        import itglue
+        from itglue.config import ITGlueConfig
+        from itglue.client import ITGlueClient
+        
+        # Benchmark client initialization
+        start = time.time()
+        config = ITGlueConfig(api_key='test-key')
+        client = ITGlueClient(config)
+        init_time = time.time() - start
+        
+        print(f'Client initialization: {init_time:.4f}s')
+        assert init_time < 1.0, f'Client init too slow: {init_time}s'
+        
+        # Benchmark model creation
+        start = time.time()
+        from itglue.models import Password, User, FlexibleAsset
+        for _ in range(1000):
+            p = Password()
+            u = User()
+            fa = FlexibleAsset()
+        model_time = time.time() - start
+        
+        print(f'1000 model creations: {model_time:.4f}s')
+        assert model_time < 2.0, f'Model creation too slow: {model_time}s'
+        "
+    
+    - name: Memory usage check
+      run: |
+        python -c "
+        import psutil
+        import os
+        import itglue
+        
+        process = psutil.Process(os.getpid())
+        initial_memory = process.memory_info().rss / 1024 / 1024  # MB
+        
+        # Import all modules
+        from itglue import *
+        from itglue.models import *
+        from itglue.api import *
+        
+        final_memory = process.memory_info().rss / 1024 / 1024  # MB
+        memory_usage = final_memory - initial_memory
+        
+        print(f'Memory usage for imports: {memory_usage:.2f} MB')
+        assert memory_usage < 50, f'Memory usage too high: {memory_usage} MB'
+        "
+
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install package from source
+      run: |
+        python -m pip install --upgrade pip
+        pip install build
+        python -m build
+        pip install dist/*.whl
+    
+    - name: Test installed package
+      run: |
+        cd /tmp
+        python -c "
+        import itglue
+        print(f'Successfully imported itglue v{itglue.__version__}')
+        
+        # Test all major imports
+        from itglue import ITGlueClient
+        from itglue.models import Password, User, FlexibleAsset
+        from itglue.api import PasswordsAPI, UsersAPI, FlexibleAssetsAPI
+        from itglue.config import ITGlueConfig
+        
+        # Test client creation
+        config = ITGlueConfig(api_key='test-key')
+        client = ITGlueClient(config)
+        
+        print('All imports and basic functionality working!')
+        "
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev]
+        pip install safety bandit semgrep
+    
+    - name: Run safety check
+      run: |
+        safety check --json --output safety-report.json || true
+        safety check
+    
+    - name: Run bandit security scan
+      run: |
+        bandit -r itglue -f json -o bandit-report.json || true
+        bandit -r itglue
+    
+    - name: Run semgrep security scan
+      run: |
+        semgrep --config=auto itglue/ --json --output=semgrep-report.json || true
+        semgrep --config=auto itglue/
+
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    needs: [comprehensive-test, integration-test, security-audit]
+    if: failure()
+    steps:
+    - name: Notify on failure
+      run: |
+        echo "Scheduled tests failed. Check the workflow logs for details."
+        echo "This indicates potential issues that need investigation." 
