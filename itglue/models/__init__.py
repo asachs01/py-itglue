@@ -21,44 +21,53 @@ from .common import (
     ITGluePhone,
     ITGlueSlug,
 )
-from .organization import Organization, OrganizationCollection, OrganizationStatus, OrganizationTypeEnum
+from .organization import (
+    Organization,
+    OrganizationCollection,
+    OrganizationStatus,
+    OrganizationTypeEnum,
+)
 from .configuration import Configuration, ConfigurationCollection, ConfigurationStatus
 from .flexible_asset import (
-    FlexibleAsset, 
+    FlexibleAsset,
     FlexibleAssetCollection,
     FlexibleAssetType,
     FlexibleAssetTypeCollection,
     FlexibleAssetField,
     FlexibleAssetFieldCollection,
-    FlexibleAssetStatus
+    FlexibleAssetStatus,
 )
 from .user import User, UserCollection, UserRole, UserStatus
-from .password import Password, PasswordCollection, PasswordType, PasswordCategory, PasswordVisibility
+from .password import (
+    Password,
+    PasswordCollection,
+    PasswordType,
+    PasswordCategory,
+    PasswordVisibility,
+)
 
 __all__ = [
     # Base models
     "ITGlueResource",
-    "ITGlueResourceCollection", 
+    "ITGlueResourceCollection",
     "ITGlueRelationship",
     "ITGlueLinks",
     "ITGlueMeta",
     "ResourceType",
-    
     # Common types
     "ITGlueDateTime",
-    "ITGlueDate", 
+    "ITGlueDate",
     "ITGlueURL",
     "ITGlueEmail",
     "ITGluePhone",
     "ITGlueSlug",
-    
     # Resource models
     "Organization",
     "OrganizationCollection",
     "OrganizationStatus",
     "OrganizationTypeEnum",
     "Configuration",
-    "ConfigurationCollection", 
+    "ConfigurationCollection",
     "ConfigurationStatus",
     "FlexibleAsset",
     "FlexibleAssetCollection",
@@ -68,7 +77,7 @@ __all__ = [
     "FlexibleAssetFieldCollection",
     "FlexibleAssetStatus",
     "User",
-    "UserCollection", 
+    "UserCollection",
     "UserRole",
     "UserStatus",
     "Password",
@@ -76,4 +85,4 @@ __all__ = [
     "PasswordType",
     "PasswordCategory",
     "PasswordVisibility",
-] 
+]

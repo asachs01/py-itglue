@@ -78,7 +78,7 @@ __all__ = [
     "FlexibleAsset",
     "FlexibleAssetCollection",
     "FlexibleAssetType",
-    "FlexibleAssetTypeCollection", 
+    "FlexibleAssetTypeCollection",
     "FlexibleAssetField",
     "FlexibleAssetFieldCollection",
     "FlexibleAssetStatus",
@@ -88,4 +88,4 @@ __all__ = [
     "FlexibleAssetsAPI",
     "FlexibleAssetTypesAPI",
     "FlexibleAssetFieldsAPI",
-] 
+]

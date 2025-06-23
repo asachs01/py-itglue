@@ -1,1 +1,1 @@
-"""ITGlue SDK Test Suite.""" 
+"""ITGlue SDK Test Suite."""

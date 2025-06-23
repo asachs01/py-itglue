@@ -8,16 +8,20 @@ validation.
 
 from .organizations import OrganizationsAPI
 from .configurations import ConfigurationsAPI
-from .flexible_assets import FlexibleAssetsAPI, FlexibleAssetTypesAPI, FlexibleAssetFieldsAPI
+from .flexible_assets import (
+    FlexibleAssetsAPI,
+    FlexibleAssetTypesAPI,
+    FlexibleAssetFieldsAPI,
+)
 from .users import UsersAPI
 from .passwords import PasswordsAPI
 
 __all__ = [
-    'OrganizationsAPI',
-    'ConfigurationsAPI',
-    'FlexibleAssetsAPI',
-    'FlexibleAssetTypesAPI',
-    'FlexibleAssetFieldsAPI',
-    'UsersAPI',
-    'PasswordsAPI',
-] 
+    "OrganizationsAPI",
+    "ConfigurationsAPI",
+    "FlexibleAssetsAPI",
+    "FlexibleAssetTypesAPI",
+    "FlexibleAssetFieldsAPI",
+    "UsersAPI",
+    "PasswordsAPI",
+]

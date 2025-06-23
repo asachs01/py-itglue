@@ -12,6 +12,7 @@ from enum import Enum
 
 class ITGlueRegion(Enum):
     """ITGlue API regions."""
+
     US = "https://api.itglue.com"
     EU = "https://api.eu.itglue.com"
     AU = "https://api.au.itglue.com"
@@ -20,58 +21,58 @@ class ITGlueRegion(Enum):
 @dataclass
 class ITGlueConfig:
     """Configuration class for ITGlue SDK."""
-    
+
     # Authentication
     api_key: str
-    
+
     # API Configuration
     base_url: str = ITGlueRegion.US.value
     api_version: str = "v1"
-    
+
     # Request Configuration
     timeout: int = 30
     max_retries: int = 3
     retry_backoff_factor: float = 0.3
-    
+
     # Rate Limiting
     requests_per_minute: int = 3000
     requests_per_5_minutes: int = 3000
-    
+
     # Pagination
     default_page_size: int = 50
     max_page_size: int = 1000
-    
+
     # Caching
     enable_caching: bool = True
     cache_ttl: int = 300  # 5 minutes
     cache_type: str = "memory"  # "memory", "redis"
     redis_url: Optional[str] = None
-    
+
     # Logging
     log_level: str = "INFO"
     log_requests: bool = False
     log_responses: bool = False
-    
+
     # Performance
     connection_pool_size: int = 10
     enable_async: bool = True
-    
+
     # Agent Features
     enable_ai_features: bool = True
     enable_bulk_operations: bool = True
     bulk_batch_size: int = 100
-    
+
     # Headers
     user_agent: str = "py-itglue/0.1.0"
     custom_headers: Dict[str, str] = field(default_factory=dict)
-    
+
     @classmethod
     def from_environment(cls) -> "ITGlueConfig":
         """Create configuration from environment variables."""
         api_key = os.getenv("ITGLUE_API_KEY")
         if not api_key:
             raise ValueError("ITGLUE_API_KEY environment variable is required")
-        
+
         # Determine region from environment or default to US
         region_env = os.getenv("ITGLUE_REGION", "US").upper()
         try:
@@ -79,7 +80,7 @@ class ITGlueConfig:
             base_url = region.value
         except KeyError:
             base_url = os.getenv("ITGLUE_BASE_URL", ITGlueRegion.US.value)
-        
+
         return cls(
             api_key=api_key,
             base_url=base_url,
@@ -96,12 +97,12 @@ class ITGlueConfig:
             enable_ai_features=os.getenv("ITGLUE_ENABLE_AI", "true").lower() == "true",
             bulk_batch_size=int(os.getenv("ITGLUE_BULK_BATCH_SIZE", "100")),
         )
-    
+
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]) -> "ITGlueConfig":
         """Create configuration from dictionary."""
         return cls(**config_dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
@@ -130,7 +131,7 @@ class ITGlueConfig:
             "user_agent": self.user_agent,
             "custom_headers": self.custom_headers,
         }
-    
+
     def get_headers(self) -> Dict[str, str]:
         """Get request headers."""
         headers = {
@@ -140,30 +141,30 @@ class ITGlueConfig:
         }
         headers.update(self.custom_headers)
         return headers
-    
+
     def get_full_url(self, endpoint: str) -> str:
         """Get full URL for an endpoint."""
         return f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-    
+
     def validate(self) -> None:
         """Validate configuration."""
         if not self.api_key:
             raise ValueError("API key is required")
-        
+
         if not self.base_url:
             raise ValueError("Base URL is required")
-        
+
         if self.timeout <= 0:
             raise ValueError("Timeout must be positive")
-        
+
         if self.max_retries < 0:
             raise ValueError("Max retries must be non-negative")
-        
+
         if self.default_page_size <= 0 or self.default_page_size > self.max_page_size:
             raise ValueError(f"Page size must be between 1 and {self.max_page_size}")
-        
+
         if self.cache_type == "redis" and not self.redis_url:
             raise ValueError("Redis URL is required when using Redis cache")
-        
+
         if self.bulk_batch_size <= 0:
-            raise ValueError("Bulk batch size must be positive") 
+            raise ValueError("Bulk batch size must be positive")
