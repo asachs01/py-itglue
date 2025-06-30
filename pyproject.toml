@@ -9,7 +9,7 @@ description = "Comprehensive Python SDK for ITGlue API with AI agent capabilitie
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Organization", email = "contact@yourorg.com"}
+    {name = "Aaron Sachs", email = "898627+asachs01@users.noreply.github.com"}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -54,10 +54,10 @@ redis = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/py-itglue"
-Repository = "https://github.com/yourusername/py-itglue"
-Documentation = "https://github.com/yourusername/py-itglue/blob/main/README.md"
-"Bug Tracker" = "https://github.com/yourusername/py-itglue/issues"
+Homepage = "https://github.com/asachs01/py-itglue"
+Repository = "https://github.com/asachs01/py-itglue"
+Documentation = "https://github.com/asachs01/py-itglue/blob/main/README.md"
+"Bug Tracker" = "https://github.com/asachs01/py-itglue/issues"
 
 [tool.mypy]
 python_version = "3.10"
