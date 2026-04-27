@@ -44,7 +44,7 @@ factory-boy>=3.3.0
 faker>=19.3.0
 
 # Performance
-uvloop>=0.17.0
+uvloop>=0.22.1
 
 # Type hints
 types-requests>=2.31.0
