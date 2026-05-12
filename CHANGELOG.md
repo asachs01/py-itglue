@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-05-12
+
+### Changed
+- **Dependencies**: Bumped runtime and dev dependency floors via Dependabot (closes #10–#19)
+  - `urllib3` >= 2.6.3 (was >= 2.0.0)
+  - `aiohttp` >= 3.13.5 (was >= 3.8.0)
+  - `python-dateutil` >= 2.9.0.post0 (was >= 2.8.2)
+  - `python-dotenv` >= 1.2.2 (was >= 1.0.0)
+  - `pyyaml` >= 6.0.3 (was >= 6.0)
+  - `uvloop` >= 0.22.1 (was >= 0.17.0)
+  - `faker` >= 40.15.0 (was >= 19.3.0)
+  - `factory-boy` >= 3.3.3 (was >= 3.3.0)
+  - `mkdocs` >= 1.6.1 (was >= 1.5.0)
+  - `types-pyyaml` >= 6.0.12.20260408 (was >= 6.0.0)
+- **CI**: Bumped `codecov/codecov-action` v5 → v6 (closes #8)
+- **CI**: Bumped `softprops/action-gh-release` v2 → v3 (closes #9)
+
 ## [0.2.5] - 2025-01-23
 
 ### Fixed

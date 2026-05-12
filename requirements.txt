@@ -1,11 +1,11 @@
 # Core dependencies
 requests>=2.31.0
 pydantic>=2.0.0
-python-dateutil>=2.8.2
-urllib3>=2.0.0
+python-dateutil>=2.9.0.post0
+urllib3>=2.6.3
 
 # Async support
-aiohttp>=3.8.0
+aiohttp>=3.13.5
 asyncio-throttle>=1.0.0
 
 # Caching
@@ -16,8 +16,8 @@ cachetools>=5.3.0
 tenacity>=8.2.0
 
 # Configuration
-python-dotenv>=1.0.0
-pyyaml>=6.0
+python-dotenv>=1.2.2
+pyyaml>=6.0.3
 
 # Logging
 structlog>=23.1.0
@@ -35,19 +35,19 @@ pre-commit>=3.3.0
 # Documentation
 sphinx>=7.1.0
 sphinx-rtd-theme>=1.3.0
-mkdocs>=1.5.0
+mkdocs>=1.6.1
 mkdocs-material>=9.1.0
 
 # Testing utilities
 responses>=0.23.0
-factory-boy>=3.3.0
-faker>=19.3.0
+factory-boy>=3.3.3
+faker>=40.15.0
 
 # Performance
-uvloop>=0.17.0
+uvloop>=0.22.1
 
 # Type hints
 types-requests>=2.31.0
 types-python-dateutil>=2.8.0
 types-redis>=4.6.0
-types-pyyaml>=6.0.0 
+types-pyyaml>=6.0.12.20260408
