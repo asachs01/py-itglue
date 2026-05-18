@@ -6,7 +6,7 @@ urllib3>=2.6.3
 
 # Async support
 aiohttp>=3.13.5
-asyncio-throttle>=1.0.0
+asyncio-throttle>=1.0.2
 
 # Caching
 redis>=4.5.0
