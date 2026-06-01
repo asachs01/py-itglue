@@ -188,7 +188,7 @@ class OrganizationCollection(ITGlueResourceCollection[Organization]):
         """Create OrganizationCollection from API response."""
         if resource_class is None:
             resource_class = Organization
-        
+
         base_collection = super().from_api_dict(data, resource_class)
         return cls(
             data=base_collection.data,

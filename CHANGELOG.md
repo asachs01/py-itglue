@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **CI**: Reformatted the codebase with Black's current (26.x) stable style and pinned
+  `black>=26.0,<27.0` so the `black --check` gate can no longer drift on a new release.
+- **CI**: Resolved Bandit findings so the security scans pass — set `usedforsecurity=False`
+  on the MD5 cache-key hash (`itglue/cache.py`) and annotated reviewed false positives
+  (B105 field-name mappings, B608 error-message f-string) with `# nosec`.
+- **Scheduled Tests**: Added the missing `performance` optional-dependency group
+  (`psutil`) that the comprehensive-test job installs, fixing the
+  `ModuleNotFoundError: No module named 'psutil'` in the memory-usage check.
+
+### Changed
+- **CI/Security**: Replaced the deprecated, auth-gated `safety check` with PyPA's
+  `pip-audit` for dependency vulnerability scanning in both the CI and Scheduled Tests
+  workflows. `pip-audit` is in the `dev` extra and needs no account to run in CI.
+
 ## [0.2.6] - 2026-05-12
 
 ### Changed

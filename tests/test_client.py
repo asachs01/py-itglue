@@ -30,9 +30,11 @@ class TestITGlueClient:
     @pytest.fixture
     def mock_components(self):
         """Create mock components."""
-        with patch("itglue.client.ITGlueHTTPClient") as mock_http, patch(
-            "itglue.client.PaginationHandler"
-        ) as mock_pagination, patch("itglue.client.CacheManager") as mock_cache:
+        with (
+            patch("itglue.client.ITGlueHTTPClient") as mock_http,
+            patch("itglue.client.PaginationHandler") as mock_pagination,
+            patch("itglue.client.CacheManager") as mock_cache,
+        ):
 
             # Configure mocks
             mock_http_instance = Mock()

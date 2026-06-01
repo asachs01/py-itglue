@@ -40,7 +40,7 @@ class TestConfiguration:
             id="123",
             name="Test Server",
             hostname="test-server.example.com",
-            **{"primary-ip": "192.168.1.100", "configuration-status-name": "Active"}
+            **{"primary-ip": "192.168.1.100", "configuration-status-name": "Active"},
         )
 
         assert config.id == "123"
@@ -131,7 +131,7 @@ class TestConfiguration:
             id="123",
             name="Test Server",
             hostname="test-server.example.com",
-            **{"configuration-status-name": "Active"}
+            **{"configuration-status-name": "Active"},
         )
 
         api_dict = config.to_api_dict()
@@ -155,17 +155,17 @@ class TestConfigurationCollection:
             Configuration(
                 id="2",
                 name="Planned Workstation",
-                **{"configuration-status-name": "Planned"}
+                **{"configuration-status-name": "Planned"},
             ),
             Configuration(
                 id="3",
                 name="Retired Router",
-                **{"configuration-status-name": "Retired"}
+                **{"configuration-status-name": "Retired"},
             ),
             Configuration(
                 id="4",
                 name="Another Active Server",
-                **{"configuration-status-name": "Active"}
+                **{"configuration-status-name": "Active"},
             ),
         ]
 

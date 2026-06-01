@@ -51,7 +51,7 @@ class TestOrganization:
             id="123",
             name="Test Organization",
             description="A test organization",
-            **{"primary-domain": "example.com"}  # Use API field name
+            **{"primary-domain": "example.com"},  # Use API field name
         )
 
         assert org.id == "123"
@@ -129,7 +129,7 @@ class TestOrganization:
             **{
                 "created-at": "2023-08-01T12:00:00.000Z",
                 "updated-at": "2023-08-02T12:00:00.000Z",
-            }
+            },
         )
 
         assert org.created_at is not None
@@ -167,7 +167,10 @@ class TestOrganization:
         org = Organization(
             id="123",
             name="Test Organization",
-            **{"organization-type-name": "Client", "organization-status-name": "Active"}
+            **{
+                "organization-type-name": "Client",
+                "organization-status-name": "Active",
+            },
         )
 
         str_repr = str(org)
@@ -215,7 +218,7 @@ class TestOrganization:
             id="123",
             name="Test Organization",
             description="A test organization",
-            **{"organization-type-name": "Client"}
+            **{"organization-type-name": "Client"},
         )
 
         api_dict = org.to_api_dict()
@@ -239,7 +242,7 @@ class TestOrganizationCollection:
                 **{
                     "organization-type-name": "Client",
                     "organization-status-name": "Active",
-                }
+                },
             ),
             Organization(
                 id="2",
@@ -247,7 +250,7 @@ class TestOrganizationCollection:
                 **{
                     "organization-type-name": "Internal",
                     "organization-status-name": "Active",
-                }
+                },
             ),
             Organization(
                 id="3",
@@ -255,7 +258,7 @@ class TestOrganizationCollection:
                 **{
                     "organization-type-name": "Vendor",
                     "organization-status-name": "Inactive",
-                }
+                },
             ),
             Organization(
                 id="4",
@@ -263,7 +266,7 @@ class TestOrganizationCollection:
                 **{
                     "organization-type-name": "Client",
                     "organization-status-name": "Active",
-                }
+                },
             ),
         ]
 

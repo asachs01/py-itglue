@@ -172,7 +172,7 @@ class PasswordsAPI(BaseAPI[Password]):
         self,
         category: Union[PasswordCategory, str],
         organization_id: Optional[str] = None,
-        **params
+        **params,
     ) -> List[Password]:
         """
         Filter passwords by security category.
@@ -199,7 +199,7 @@ class PasswordsAPI(BaseAPI[Password]):
         self,
         visibility: Union[PasswordVisibility, str],
         organization_id: Optional[str] = None,
-        **params
+        **params,
     ) -> List[Password]:
         """
         Filter passwords by visibility level.
@@ -226,7 +226,7 @@ class PasswordsAPI(BaseAPI[Password]):
         self,
         password_type: Union[PasswordType, str],
         organization_id: Optional[str] = None,
-        **params
+        **params,
     ) -> List[Password]:
         """
         Filter passwords by type.
@@ -277,9 +277,7 @@ class PasswordsAPI(BaseAPI[Password]):
         Returns:
             List of high security passwords
         """
-        high_passwords = self.filter_by_category(
-            PasswordCategory.HIGH, organization_id
-        )
+        high_passwords = self.filter_by_category(PasswordCategory.HIGH, organization_id)
         critical_passwords = self.filter_by_category(
             PasswordCategory.CRITICAL, organization_id
         )
@@ -343,9 +341,7 @@ class PasswordsAPI(BaseAPI[Password]):
         Returns:
             List of private passwords
         """
-        return self.filter_by_visibility(
-            PasswordVisibility.PRIVATE, organization_id
-        )
+        return self.filter_by_visibility(PasswordVisibility.PRIVATE, organization_id)
 
     def get_embedded_passwords(
         self, organization_id: Optional[str] = None
@@ -500,7 +496,7 @@ class PasswordsAPI(BaseAPI[Password]):
         password_category: Union[PasswordCategory, str] = PasswordCategory.LOW,
         visibility: Union[PasswordVisibility, str] = PasswordVisibility.PRIVATE,
         favorite: bool = False,
-        **additional_fields
+        **additional_fields,
     ) -> Password:
         """
         Create a new password.
@@ -558,9 +554,7 @@ class PasswordsAPI(BaseAPI[Password]):
 
         return self.create(data)
 
-    def update_password_value(
-        self, password_id: str, new_password: str
-    ) -> Password:
+    def update_password_value(self, password_id: str, new_password: str) -> Password:
         """
         Update password value.
 
@@ -724,9 +718,7 @@ class PasswordsAPI(BaseAPI[Password]):
 
         return stats
 
-    def get_organization_password_report(
-        self, organization_id: str
-    ) -> Dict[str, Any]:
+    def get_organization_password_report(self, organization_id: str) -> Dict[str, Any]:
         """
         Get comprehensive password report for an organization.
 
@@ -738,9 +730,7 @@ class PasswordsAPI(BaseAPI[Password]):
         """
         stats = self.get_password_statistics(organization_id)
         stale_passwords = self.get_stale_passwords(90, organization_id)
-        recent_passwords = self.get_recently_updated_passwords(
-            30, organization_id
-        )
+        recent_passwords = self.get_recently_updated_passwords(30, organization_id)
 
         return {
             **stats,

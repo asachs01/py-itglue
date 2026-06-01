@@ -38,7 +38,9 @@ from .exceptions import (
 class SimpleRateLimiter:
     """Simple rate limiter for API requests."""
 
-    def __init__(self, requests_per_minute: int = 120, requests_per_5_minutes: int = 500):
+    def __init__(
+        self, requests_per_minute: int = 120, requests_per_5_minutes: int = 500
+    ):
         self.requests_per_minute = requests_per_minute
         self.requests_per_5_minutes = requests_per_5_minutes
         self.minute_requests: List[float] = []

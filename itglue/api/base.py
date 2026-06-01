@@ -159,9 +159,7 @@ class BaseAPI(Generic[T]):
             logger.error(f"Failed to process {self.resource_type.value} response: {e}")
             raise ITGlueValidationError(f"Invalid response format: {e}")
 
-    def get(
-        self, resource_id: str, include: Optional[List[str]] = None, **kwargs
-    ) -> T:
+    def get(self, resource_id: str, include: Optional[List[str]] = None, **kwargs) -> T:
         """Get a single resource by ID.
 
         Args:
@@ -265,27 +263,27 @@ class BaseAPI(Generic[T]):
         while True:
             page_params = params.copy()
             page_params["page[number]"] = str(page)
-            
+
             response = self.client.get(url, params=page_params)
             if not response or "data" not in response:
                 break
-                
+
             all_data.extend(response["data"])
-            
+
             # Check if there are more pages
             meta = response.get("meta", {})
             if not meta.get("has-next-page", False):
                 break
-                
+
             page += 1
 
         # Create a combined response
         combined_response = {
             "data": all_data,
             "meta": {"total-count": len(all_data)},
-            "links": {}
+            "links": {},
         }
-        
+
         return self._process_response(combined_response, is_collection=True)
 
     def create(self, data: Union[T, Dict[str, Any]], **kwargs) -> T:
@@ -323,9 +321,7 @@ class BaseAPI(Generic[T]):
         response = self.client.post(url, json_data=request_data, params=params)
         return self._process_response(response, is_collection=False)
 
-    def update(
-        self, resource_id: str, data: Union[T, Dict[str, Any]], **kwargs
-    ) -> T:
+    def update(self, resource_id: str, data: Union[T, Dict[str, Any]], **kwargs) -> T:
         """Update an existing resource.
 
         Args:
@@ -427,30 +423,34 @@ class BaseAPI(Generic[T]):
             page=page, per_page=per_page, filter_params=search_filters, **kwargs
         )
 
-    def get_by_id(self, resource_id: str, params: Optional[Dict[str, str]] = None) -> Optional[T]:
+    def get_by_id(
+        self, resource_id: str, params: Optional[Dict[str, str]] = None
+    ) -> Optional[T]:
         """Get a single resource by ID."""
         endpoint = self._build_url(resource_id)
         self.logger.info("Getting resource by ID", resource_id=resource_id)
-        
+
         try:
             response = self.client.get(endpoint, params=params or {})
-            
+
             if response and "data" in response:
                 return self.model_class.from_api_dict(response["data"])
             return None
-            
+
         except Exception as e:
-            self.logger.error("Failed to get resource", resource_id=resource_id, error=str(e))
+            self.logger.error(
+                "Failed to get resource", resource_id=resource_id, error=str(e)
+            )
             raise
 
     def get_all(self, params: Optional[Dict[str, str]] = None, **kwargs) -> List[T]:
         """Get all resources with pagination."""
         endpoint = self._build_url()
         self.logger.info("Getting all resources", params=params)
-        
+
         try:
             response = self.client.get(endpoint, params=params or {})
-            
+
             if response and "data" in response:
                 all_data = response["data"]
                 if isinstance(all_data, list):
@@ -458,39 +458,48 @@ class BaseAPI(Generic[T]):
                 else:
                     return [self.model_class.from_api_dict(all_data)]
             return []
-            
+
         except Exception as e:
             self.logger.error("Failed to get all resources", error=str(e))
             raise
 
-    def create(self, data: Dict[str, Any], params: Optional[Dict[str, str]] = None) -> Optional[T]:
+    def create(
+        self, data: Dict[str, Any], params: Optional[Dict[str, str]] = None
+    ) -> Optional[T]:
         """Create a new resource."""
         endpoint = self._build_url()
         self.logger.info("Creating resource", data=data)
-        
+
         try:
             response = self.client.post(endpoint, data=data, params=params or {})
-            
+
             if response and "data" in response:
                 return self.model_class.from_api_dict(response["data"])
             return None
-            
+
         except Exception as e:
             self.logger.error("Failed to create resource", error=str(e))
             raise
 
-    def update(self, resource_id: str, data: Dict[str, Any], params: Optional[Dict[str, str]] = None) -> Optional[T]:
+    def update(
+        self,
+        resource_id: str,
+        data: Dict[str, Any],
+        params: Optional[Dict[str, str]] = None,
+    ) -> Optional[T]:
         """Update an existing resource."""
         endpoint = self._build_url(resource_id)
         self.logger.info("Updating resource", resource_id=resource_id, data=data)
-        
+
         try:
             response = self.client.patch(endpoint, data=data, params=params or {})
-            
+
             if response and "data" in response:
                 return self.model_class.from_api_dict(response["data"])
             return None
-            
+
         except Exception as e:
-            self.logger.error("Failed to update resource", resource_id=resource_id, error=str(e))
+            self.logger.error(
+                "Failed to update resource", resource_id=resource_id, error=str(e)
+            )
             raise

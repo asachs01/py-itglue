@@ -329,7 +329,7 @@ class FlexibleAssetCollection(ITGlueResourceCollection[FlexibleAsset]):
         """Create FlexibleAssetCollection from API response."""
         if resource_class is None:
             resource_class = FlexibleAsset
-        
+
         base_collection = super().from_api_dict(data, resource_class)
         return cls(
             data=base_collection.data,
@@ -381,12 +381,14 @@ class FlexibleAssetTypeCollection(ITGlueResourceCollection[FlexibleAssetType]):
 
     @classmethod
     def from_api_dict(
-        cls, data: Dict[str, Any], resource_class: Optional[Type[FlexibleAssetType]] = None
+        cls,
+        data: Dict[str, Any],
+        resource_class: Optional[Type[FlexibleAssetType]] = None,
     ) -> "FlexibleAssetTypeCollection":
         """Create FlexibleAssetTypeCollection from API response."""
         if resource_class is None:
             resource_class = FlexibleAssetType
-        
+
         base_collection = super().from_api_dict(data, resource_class)
         return cls(
             data=base_collection.data,
@@ -412,12 +414,14 @@ class FlexibleAssetFieldCollection(ITGlueResourceCollection[FlexibleAssetField])
 
     @classmethod
     def from_api_dict(
-        cls, data: Dict[str, Any], resource_class: Optional[Type[FlexibleAssetField]] = None
+        cls,
+        data: Dict[str, Any],
+        resource_class: Optional[Type[FlexibleAssetField]] = None,
     ) -> "FlexibleAssetFieldCollection":
         """Create FlexibleAssetFieldCollection from API response."""
         if resource_class is None:
             resource_class = FlexibleAssetField
-        
+
         base_collection = super().from_api_dict(data, resource_class)
         return cls(
             data=base_collection.data,

@@ -312,9 +312,7 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
         data = {"type": "flexible_assets", "attributes": {"traits": updated_traits}}
 
-        response = self.client.patch(
-            self._build_url(flexible_asset_id), {"data": data}
-        )
+        response = self.client.patch(self._build_url(flexible_asset_id), {"data": data})
         return FlexibleAsset.from_api_dict(response["data"])
 
     def add_tags(
@@ -341,9 +339,7 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
         data = {"type": "flexible_assets", "attributes": {"tag_list": updated_tags}}
 
-        response = self.client.patch(
-            self._build_url(flexible_asset_id), {"data": data}
-        )
+        response = self.client.patch(self._build_url(flexible_asset_id), {"data": data})
         return FlexibleAsset.from_api_dict(response["data"])
 
     def remove_tags(
@@ -367,9 +363,7 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
         data = {"type": "flexible_assets", "attributes": {"tag_list": updated_tags}}
 
-        response = self.client.patch(
-            self._build_url(flexible_asset_id), {"data": data}
-        )
+        response = self.client.patch(self._build_url(flexible_asset_id), {"data": data})
         return FlexibleAsset.from_api_dict(response["data"])
 
     def update_status(
@@ -393,9 +387,7 @@ class FlexibleAssetsAPI(BaseAPI[FlexibleAsset]):
 
         data = {"type": "flexible_assets", "attributes": {"status": status_value}}
 
-        response = self.client.patch(
-            self._build_url(flexible_asset_id), {"data": data}
-        )
+        response = self.client.patch(self._build_url(flexible_asset_id), {"data": data})
         return FlexibleAsset.from_api_dict(response["data"])
 
     def get_asset_statistics(

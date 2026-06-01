@@ -93,8 +93,10 @@ class MemoryCache(CacheBackend):
         if len(self.cache) >= self.max_size and key not in self.cache:
             # Remove 20% of oldest entries
             cleanup_count = max(1, int(self.max_size * 0.2))
-            oldest_keys = sorted(self.access_times.items(), key=lambda x: x[1])[:cleanup_count]
-            
+            oldest_keys = sorted(self.access_times.items(), key=lambda x: x[1])[
+                :cleanup_count
+            ]
+
             for old_key, _ in oldest_keys:
                 self.cache.pop(old_key, None)
                 self.access_times.pop(old_key, None)
@@ -190,7 +192,9 @@ class RedisCache(CacheBackend):
 
         except Exception as e:
             self.logger.error("Redis delete error", key=key, error=str(e))
-            raise ITGlueCacheError(f"Failed to delete from Redis cache: {e}")
+            # Error message, not a SQL query (bandit B608 false positive).
+            msg = f"Failed to delete from Redis cache: {e}"  # nosec B608
+            raise ITGlueCacheError(msg)
 
     def clear(self) -> None:
         """Clear all cache entries with our prefix."""
@@ -271,7 +275,8 @@ class CacheManager:
             key_data["params"] = dict(sorted(params.items()))
 
         key_string = json.dumps(key_data, sort_keys=True)
-        cache_key = hashlib.md5(key_string.encode()).hexdigest()
+        # MD5 is used purely to derive a compact cache key, not for security.
+        cache_key = hashlib.md5(key_string.encode(), usedforsecurity=False).hexdigest()
 
         return cache_key
 
