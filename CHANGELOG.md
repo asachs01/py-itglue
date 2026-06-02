@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Scheduled Tests**: Added the missing `performance` optional-dependency group
   (`psutil`) that the comprehensive-test job installs, fixing the
   `ModuleNotFoundError: No module named 'psutil'` in the memory-usage check.
+- **CI (Windows)**: Gated `uvloop` on `sys_platform != 'win32'` in `requirements.txt`;
+  uvloop has no Windows support and was failing the Windows test matrix with
+  `RuntimeError: uvloop does not support Windows`.
 
 ### Changed
 - **CI/Security**: Replaced the deprecated, auth-gated `safety check` with PyPA's
