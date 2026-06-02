@@ -41,7 +41,7 @@ mkdocs-material>=9.1.0
 # Testing utilities
 responses>=0.23.0
 factory-boy>=3.3.3
-faker>=40.15.0
+faker>=40.20.0
 
 # Performance (uvloop has no Windows support, so skip it there)
 uvloop>=0.22.1; sys_platform != 'win32'
