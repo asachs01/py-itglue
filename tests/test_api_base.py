@@ -329,7 +329,9 @@ class TestAPIOperations:
 
         with patch.object(test_api, "_process_response") as mock_process:
             # Create mock resource with the expected attributes
-            mock_resource = MockTestResource(id="123", attributes={"name": "Updated Org"})
+            mock_resource = MockTestResource(
+                id="123", attributes={"name": "Updated Org"}
+            )
             mock_process.return_value = mock_resource
 
             data = {"name": "Updated Org"}
@@ -352,9 +354,7 @@ class TestAPIOperations:
 
     def test_delete_resource_not_found(self, test_api, mock_http_client):
         """Test deleting non-existent resource raises not found error."""
-        mock_http_client.delete = Mock(
-            side_effect=ITGlueAPIError("Not found", 404)
-        )
+        mock_http_client.delete = Mock(side_effect=ITGlueAPIError("Not found", 404))
 
         with pytest.raises(ITGlueNotFoundError, match="Organizations 123 not found"):
             test_api.delete("123")

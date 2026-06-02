@@ -26,7 +26,6 @@ from itglue.models.flexible_asset import (
 from itglue.exceptions import ITGlueValidationError
 
 
-
 class TestFlexibleAssetsAPI:
     """Test FlexibleAssetsAPI class."""
 
@@ -361,9 +360,7 @@ class TestFlexibleAssetsAPI:
         )
         assert isinstance(result, FlexibleAsset)
 
-    def test_add_tags(
-        self, flexible_assets_api, mock_http_client, sample_asset_data
-    ):
+    def test_add_tags(self, flexible_assets_api, mock_http_client, sample_asset_data):
         """Test adding tags to flexible asset."""
         # Mock get call for current asset
         current_asset_data = {
@@ -429,9 +426,7 @@ class TestFlexibleAssetsAPI:
         mock_http_client.patch.return_value = sample_asset_data
 
         # Test with enum
-        result = flexible_assets_api.update_status(
-            "123", FlexibleAssetStatus.ARCHIVED
-        )
+        result = flexible_assets_api.update_status("123", FlexibleAssetStatus.ARCHIVED)
 
         expected_data = {
             "data": {"type": "flexible_assets", "attributes": {"status": "Archived"}}
@@ -465,7 +460,6 @@ class TestFlexibleAssetsAPI:
 
         # Verify correct API calls were made
         assert mock_http_client.get.call_count == 3
-
 
 
 class TestFlexibleAssetTypesAPI:
@@ -588,7 +582,6 @@ class TestFlexibleAssetTypesAPI:
         assert isinstance(result, FlexibleAssetFieldCollection)
 
 
-
 class TestFlexibleAssetFieldsAPI:
     """Test FlexibleAssetFieldsAPI class."""
 
@@ -680,9 +673,7 @@ class TestFlexibleAssetFieldsAPI:
         )
 
         # Test with asset type filter
-        flexible_asset_fields_api.get_by_kind(
-            "Number", flexible_asset_type_id="123"
-        )
+        flexible_asset_fields_api.get_by_kind("Number", flexible_asset_type_id="123")
 
         expected_params = {
             "filter[kind]": "Number",

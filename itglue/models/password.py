@@ -55,15 +55,16 @@ class Password(ITGlueResource):
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Override setattr to handle property setters for hyphenated attributes."""
-        # Define mapping of Python property names to API attribute names
+        # Define mapping of Python property names to API attribute names.
+        # These are field-name strings, not credentials (bandit B105 false positive).
         property_mappings = {
             "name": "name",
             "username": "username",
-            "password": "password",
+            "password": "password",  # nosec B105
             "url": "url",
             "notes": "notes",
-            "password_type": "password-type",
-            "password_category": "password-category-name",
+            "password_type": "password-type",  # nosec B105
+            "password_category": "password-category-name",  # nosec B105
             "visibility": "visibility",
             "auto_fill_selectors": "autofill-selectors",
             "favorite": "favorite",
@@ -345,7 +346,7 @@ class PasswordCollection(ITGlueResourceCollection[Password]):
         """Create PasswordCollection from API response."""
         if resource_class is None:
             resource_class = Password
-        
+
         base_collection = super().from_api_dict(data, resource_class)
         return cls(
             data=base_collection.data,

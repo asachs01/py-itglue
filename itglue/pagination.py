@@ -118,27 +118,33 @@ class PaginationHandler:
                 params[key] = str(value)
         return params
 
-    def get_page(self, endpoint: str, page: int, page_size: Optional[int] = None, **kwargs) -> PaginatedResponse:
+    def get_page(
+        self, endpoint: str, page: int, page_size: Optional[int] = None, **kwargs
+    ) -> PaginatedResponse:
         """Get specific page."""
         params = self.build_params(**kwargs)
         params["page[number]"] = str(page)
-        
+
         if page_size:
             params["page[size]"] = str(page_size)
-        
+
         response = self.http_client.get(endpoint, params=params)
         self.last_response = response
         return self.parse_response(response)
 
-    def get_next_page(self, endpoint: str, current_response: PaginatedResponse, **kwargs) -> Optional[PaginatedResponse]:
+    def get_next_page(
+        self, endpoint: str, current_response: PaginatedResponse, **kwargs
+    ) -> Optional[PaginatedResponse]:
         """Get next page of results."""
         if not current_response.pagination.has_next:
             return None
-        
+
         next_page = current_response.pagination.next_page
         return self.get_page(endpoint, next_page, **kwargs)
 
-    def get_prev_page(self, endpoint: str, current_response: PaginatedResponse, **kwargs) -> Optional[PaginatedResponse]:
+    def get_prev_page(
+        self, endpoint: str, current_response: PaginatedResponse, **kwargs
+    ) -> Optional[PaginatedResponse]:
         """Get the previous page based on current response."""
         if not current_response.pagination.has_prev:
             return None
@@ -146,36 +152,42 @@ class PaginationHandler:
         prev_page = current_response.pagination.prev_page
         return self.get_page(endpoint, prev_page, **kwargs)
 
-    def get_all_pages(self, endpoint: str, page_size: Optional[int] = None, max_pages: Optional[int] = None, **kwargs) -> PaginatedResponse:
+    def get_all_pages(
+        self,
+        endpoint: str,
+        page_size: Optional[int] = None,
+        max_pages: Optional[int] = None,
+        **kwargs,
+    ) -> PaginatedResponse:
         """Get all pages of results."""
         all_data = []
         page_num = 1
         pages_fetched = 0
-        
+
         while True:
             if max_pages and pages_fetched >= max_pages:
                 break
-                
+
             response = self.get_page(endpoint, page_num, page_size, **kwargs)
             if not response or not response.data:
                 break
-                
+
             all_data.extend(response.data)
             pages_fetched += 1
-            
+
             # Check if there are more pages
             if not response.pagination.has_next:
                 break
-                
+
             page_num = response.pagination.next_page
-            
+
         # Create combined response
         combined_meta = {
             "total-count": len(all_data),
             "current-page": 1,
             "total-pages": pages_fetched,
         }
-        
+
         return PaginatedResponse(all_data, combined_meta, {})
 
     def iterate_pages(
@@ -241,7 +253,7 @@ class PaginationHandler:
         """Get current page information from last response."""
         if not self.last_response:
             return {}
-            
+
         meta = self.last_response.get("meta", {})
         return {
             "current_page": meta.get("current-page", 1),

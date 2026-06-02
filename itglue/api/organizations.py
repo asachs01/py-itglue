@@ -52,9 +52,7 @@ class OrganizationsAPI(BaseAPI[Organization]):
             # Use partial matching
             filter_params = {"name": f"*{name}*"}
 
-        results = self.list(
-            filter_params=filter_params, include=include, per_page=1
-        )
+        results = self.list(filter_params=filter_params, include=include, per_page=1)
 
         return results.data[0] if results.data else None
 

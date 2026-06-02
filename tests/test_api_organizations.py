@@ -100,9 +100,7 @@ class TestOrganizationsAPISpecializedMethods:
             mock_org = Organization.from_api_dict(sample_organization_data)
             mock_process.return_value = mock_org
 
-            result = organizations_api.update_status(
-                "123", OrganizationStatus.INACTIVE
-            )
+            result = organizations_api.update_status("123", OrganizationStatus.INACTIVE)
 
             assert result == mock_org
             mock_http_client.patch.assert_called_once()

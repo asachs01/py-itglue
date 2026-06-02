@@ -112,10 +112,7 @@ class TestPasswordsAPIInitialization:
 class TestPasswordsAPISearch:
     """Test search and filtering operations."""
 
-    
-    def test_search_passwords(
-        self, passwords_api, sample_password_collection_data
-    ):
+    def test_search_passwords(self, passwords_api, sample_password_collection_data):
         """Test searching passwords by query."""
         passwords_api.list = Mock(
             return_value=[
@@ -131,15 +128,12 @@ class TestPasswordsAPISearch:
         assert len(results) == 1
         assert results[0].name == "Gmail"
 
-    
     def test_get_by_name_exact_match(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting password by exact name match."""
         password_data = sample_password_collection_data["data"][0]
-        passwords_api.list = Mock(
-            return_value=[Password.from_api_dict(password_data)]
-        )
+        passwords_api.list = Mock(return_value=[Password.from_api_dict(password_data)])
 
         result = passwords_api.get_by_name("Gmail", organization_id="456")
 
@@ -149,22 +143,18 @@ class TestPasswordsAPISearch:
         assert result is not None
         assert result.name == "Gmail"
 
-    
     def test_get_by_name_case_insensitive(
         self, passwords_api, sample_password_collection_data
     ):
         """Test getting password by name with case insensitive matching."""
         password_data = sample_password_collection_data["data"][0]
-        passwords_api.list = Mock(
-            return_value=[Password.from_api_dict(password_data)]
-        )
+        passwords_api.list = Mock(return_value=[Password.from_api_dict(password_data)])
 
         result = passwords_api.get_by_name("gmail")  # lowercase
 
         assert result is not None
         assert result.name == "Gmail"
 
-    
     def test_get_by_name_not_found(self, passwords_api):
         """Test getting password by name when not found."""
         passwords_api.list = Mock(return_value=[])
@@ -173,15 +163,10 @@ class TestPasswordsAPISearch:
 
         assert result is None
 
-    
-    def test_search_by_username(
-        self, passwords_api, sample_password_collection_data
-    ):
+    def test_search_by_username(self, passwords_api, sample_password_collection_data):
         """Test searching passwords by username."""
         password_data = sample_password_collection_data["data"][0]
-        passwords_api.list = Mock(
-            return_value=[Password.from_api_dict(password_data)]
-        )
+        passwords_api.list = Mock(return_value=[Password.from_api_dict(password_data)])
 
         results = passwords_api.search_by_username(
             "user1@example.com", organization_id="456"
@@ -196,14 +181,11 @@ class TestPasswordsAPISearch:
         assert len(results) == 1
         assert results[0].username == "user1@example.com"
 
-    
     def test_search_by_url(self, passwords_api, sample_password_collection_data):
         """Test searching passwords by URL."""
         password_data = sample_password_collection_data["data"][0]
         password_data["attributes"]["url"] = "https://gmail.com"
-        passwords_api.list = Mock(
-            return_value=[Password.from_api_dict(password_data)]
-        )
+        passwords_api.list = Mock(return_value=[Password.from_api_dict(password_data)])
 
         results = passwords_api.search_by_url("gmail.com", organization_id="456")
 
@@ -216,7 +198,6 @@ class TestPasswordsAPISearch:
 class TestPasswordsAPIOrganizationFiltering:
     """Test organization-based filtering."""
 
-    
     def test_get_organization_passwords(
         self, passwords_api, sample_password_collection_data
     ):
@@ -237,7 +218,6 @@ class TestPasswordsAPIOrganizationFiltering:
         )
         assert len(results) == 2
 
-    
     def test_get_organization_passwords_include_archived(
         self, passwords_api, sample_password_collection_data
     ):
@@ -249,9 +229,7 @@ class TestPasswordsAPIOrganizationFiltering:
             ]
         )
 
-        results = passwords_api.get_organization_passwords(
-            "456", include_archived=True
-        )
+        results = passwords_api.get_organization_passwords("456", include_archived=True)
 
         passwords_api.list.assert_called_once_with(
             params={"filter[organization-id]": "456"}
@@ -262,15 +240,12 @@ class TestPasswordsAPIOrganizationFiltering:
 class TestPasswordsAPISecurityFiltering:
     """Test security and visibility filtering."""
 
-    
     def test_filter_by_category_enum(
         self, passwords_api, sample_password_collection_data
     ):
         """Test filtering by password category using enum."""
         password_data = sample_password_collection_data["data"][1]  # critical password
-        passwords_api.list = Mock(
-            return_value=[Password.from_api_dict(password_data)]
-        )
+        passwords_api.list = Mock(return_value=[Password.from_api_dict(password_data)])
 
         results = passwords_api.filter_by_category(
             PasswordCategory.CRITICAL, organization_id="456"
@@ -285,15 +260,12 @@ class TestPasswordsAPISecurityFiltering:
         assert len(results) == 1
         assert results[0].password_category == PasswordCategory.CRITICAL
 
-    
     def test_filter_by_category_string(
         self, passwords_api, sample_password_collection_data
     ):
         """Test filtering by password category using string."""
         password_data = sample_password_collection_data["data"][0]  # high password
-        passwords_api.list = Mock(
-            return_value=[Password.from_api_dict(password_data)]
-        )
+        passwords_api.list = Mock(return_value=[Password.from_api_dict(password_data)])
 
         results = passwords_api.filter_by_category("high")
 
@@ -302,15 +274,12 @@ class TestPasswordsAPISecurityFiltering:
         )
         assert len(results) == 1
 
-    
     def test_filter_by_visibility_enum(
         self, passwords_api, sample_password_collection_data
     ):
         """Test filtering by visibility using enum."""
         password_data = sample_password_collection_data["data"][0]  # private password
-        passwords_api.list = Mock(
-            return_value=[Password.from_api_dict(password_data)]
-        )
+        passwords_api.list = Mock(return_value=[Password.from_api_dict(password_data)])
 
         results = passwords_api.filter_by_visibility(
             PasswordVisibility.PRIVATE, organization_id="456"
@@ -322,15 +291,10 @@ class TestPasswordsAPISecurityFiltering:
         assert len(results) == 1
         assert results[0].visibility == PasswordVisibility.PRIVATE
 
-    
-    def test_filter_by_type_enum(
-        self, passwords_api, sample_password_collection_data
-    ):
+    def test_filter_by_type_enum(self, passwords_api, sample_password_collection_data):
         """Test filtering by password type using enum."""
         password_data = sample_password_collection_data["data"][0]  # embedded password
-        passwords_api.list = Mock(
-            return_value=[Password.from_api_dict(password_data)]
-        )
+        passwords_api.list = Mock(return_value=[Password.from_api_dict(password_data)])
 
         results = passwords_api.filter_by_type(PasswordType.EMBEDDED)
 
@@ -344,7 +308,6 @@ class TestPasswordsAPISecurityFiltering:
 class TestPasswordsAPISecurityMethods:
     """Test security-focused methods."""
 
-    
     def test_get_critical_passwords(
         self, passwords_api, sample_password_collection_data
     ):
@@ -362,7 +325,6 @@ class TestPasswordsAPISecurityMethods:
         assert len(results) == 1
         assert results[0].password_category == PasswordCategory.CRITICAL
 
-    
     def test_get_high_security_passwords(
         self, passwords_api, sample_password_collection_data
     ):
@@ -386,7 +348,6 @@ class TestPasswordsAPISecurityMethods:
         assert passwords_api.filter_by_category.call_count == 2
         assert len(results) == 2  # Should include both high and critical
 
-    
     def test_get_high_security_passwords_deduplication(
         self, passwords_api, sample_password_collection_data
     ):
@@ -407,10 +368,7 @@ class TestPasswordsAPISecurityMethods:
 
         assert len(results) == 1  # Should be deduplicated
 
-    
-    def test_get_shared_passwords(
-        self, passwords_api, sample_password_collection_data
-    ):
+    def test_get_shared_passwords(self, passwords_api, sample_password_collection_data):
         """Test getting shared passwords."""
         shared_password = Password.from_api_dict(
             sample_password_collection_data["data"][1]
@@ -430,7 +388,6 @@ class TestPasswordsAPISecurityMethods:
         assert len(results) == 1
         assert results[0].visibility == PasswordVisibility.ORGANIZATION
 
-    
     def test_get_private_passwords(
         self, passwords_api, sample_password_collection_data
     ):
@@ -448,7 +405,6 @@ class TestPasswordsAPISecurityMethods:
         assert len(results) == 1
         assert results[0].visibility == PasswordVisibility.PRIVATE
 
-    
     def test_get_embedded_passwords(
         self, passwords_api, sample_password_collection_data
     ):
@@ -466,10 +422,7 @@ class TestPasswordsAPISecurityMethods:
         assert len(results) == 1
         assert results[0].password_type == PasswordType.EMBEDDED
 
-    
-    def test_get_linked_passwords(
-        self, passwords_api, sample_password_collection_data
-    ):
+    def test_get_linked_passwords(self, passwords_api, sample_password_collection_data):
         """Test getting linked passwords."""
         linked_password = Password.from_api_dict(
             sample_password_collection_data["data"][1]
@@ -486,7 +439,6 @@ class TestPasswordsAPISecurityMethods:
 class TestPasswordsAPISpecialStates:
     """Test special state filtering methods."""
 
-    
     def test_get_favorite_passwords(
         self, passwords_api, sample_password_collection_data
     ):
@@ -504,7 +456,6 @@ class TestPasswordsAPISpecialStates:
         assert len(results) == 1
         assert results[0].favorite is True
 
-    
     def test_get_archived_passwords(
         self, passwords_api, sample_password_collection_data
     ):
@@ -522,10 +473,7 @@ class TestPasswordsAPISpecialStates:
         assert len(results) == 1
         assert results[0].archived is True
 
-    
-    def test_get_active_passwords(
-        self, passwords_api, sample_password_collection_data
-    ):
+    def test_get_active_passwords(self, passwords_api, sample_password_collection_data):
         """Test getting active passwords."""
         active_password = Password.from_api_dict(
             sample_password_collection_data["data"][0]
@@ -544,7 +492,6 @@ class TestPasswordsAPISpecialStates:
 class TestPasswordsAPITimeFiltering:
     """Test time-based filtering methods."""
 
-    
     def test_get_recently_updated_passwords(
         self, passwords_api, sample_password_collection_data
     ):
@@ -566,10 +513,7 @@ class TestPasswordsAPITimeFiltering:
         # Verify that the date filter contains an ISO date string
         assert "T" in call_args["filter[updated-at][gt]"]  # ISO format check
 
-    
-    def test_get_stale_passwords(
-        self, passwords_api, sample_password_collection_data
-    ):
+    def test_get_stale_passwords(self, passwords_api, sample_password_collection_data):
         """Test getting stale passwords."""
         stale_password = Password.from_api_dict(
             sample_password_collection_data["data"][0]
@@ -590,7 +534,6 @@ class TestPasswordsAPITimeFiltering:
 class TestPasswordsAPIManagement:
     """Test password management operations."""
 
-    
     def test_create_password(self, passwords_api, sample_password_data):
         """Test creating a new password."""
         passwords_api.create = Mock(
@@ -630,7 +573,6 @@ class TestPasswordsAPIManagement:
 
         assert result.name == "Gmail Account"
 
-    
     def test_create_password_with_string_enums(
         self, passwords_api, sample_password_data
     ):
@@ -654,7 +596,6 @@ class TestPasswordsAPIManagement:
         assert call_args["attributes"]["password-category-name"] == "critical"
         assert call_args["attributes"]["visibility"] == "everyone"
 
-    
     def test_update_password_value(self, passwords_api, sample_password_data):
         """Test updating password value."""
         passwords_api.update = Mock(
@@ -670,10 +611,7 @@ class TestPasswordsAPIManagement:
         assert update_data["type"] == ResourceType.PASSWORDS.value
         assert update_data["attributes"]["password"] == "newpassword"
 
-    
-    def test_update_password_visibility(
-        self, passwords_api, sample_password_data
-    ):
+    def test_update_password_visibility(self, passwords_api, sample_password_data):
         """Test updating password visibility."""
         passwords_api.update = Mock(
             return_value=Password.from_api_dict(sample_password_data)
@@ -689,7 +627,6 @@ class TestPasswordsAPIManagement:
         update_data = call_args[0][1]
         assert update_data["attributes"]["visibility"] == "everyone"
 
-    
     def test_update_password_category(self, passwords_api, sample_password_data):
         """Test updating password security category."""
         passwords_api.update = Mock(
@@ -704,7 +641,6 @@ class TestPasswordsAPIManagement:
         update_data = call_args[0][1]
         assert update_data["attributes"]["password-category-name"] == "critical"
 
-    
     def test_toggle_favorite(self, passwords_api, sample_password_data):
         """Test toggling password favorite status."""
         # Mock current password state
@@ -728,7 +664,6 @@ class TestPasswordsAPIManagement:
         update_data = call_args[0][1]
         assert update_data["attributes"]["favorite"] is False  # Toggled from True
 
-    
     def test_archive_password(self, passwords_api, sample_password_data):
         """Test archiving a password."""
         passwords_api.update = Mock(
@@ -741,7 +676,6 @@ class TestPasswordsAPIManagement:
         update_data = call_args[0][1]
         assert update_data["attributes"]["archived"] is True
 
-    
     def test_unarchive_password(self, passwords_api, sample_password_data):
         """Test unarchiving a password."""
         passwords_api.update = Mock(
@@ -758,7 +692,6 @@ class TestPasswordsAPIManagement:
 class TestPasswordsAPIAnalytics:
     """Test analytics and reporting methods."""
 
-    
     def test_get_password_statistics_empty(self, passwords_api):
         """Test getting statistics for empty password collection."""
         passwords_api.get_active_passwords = Mock(return_value=[])
@@ -770,7 +703,6 @@ class TestPasswordsAPIAnalytics:
         assert stats["archived_passwords"] == 0
         assert stats["critical_passwords"] == 0
 
-    
     def test_get_password_statistics(
         self, passwords_api, sample_password_collection_data
     ):
@@ -782,9 +714,7 @@ class TestPasswordsAPIAnalytics:
         archived_passwords = []
 
         passwords_api.get_active_passwords = Mock(return_value=active_passwords)
-        passwords_api.get_archived_passwords = Mock(
-            return_value=archived_passwords
-        )
+        passwords_api.get_archived_passwords = Mock(return_value=archived_passwords)
 
         stats = passwords_api.get_password_statistics(organization_id="456")
 
@@ -804,7 +734,6 @@ class TestPasswordsAPIAnalytics:
         assert "visibility_distribution" in stats
         assert "type_distribution" in stats
 
-    
     def test_get_organization_password_report(
         self, passwords_api, sample_password_collection_data
     ):

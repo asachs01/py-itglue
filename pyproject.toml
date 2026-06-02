@@ -35,19 +35,24 @@ dev = [
     "pytest-cov>=4.0.0",
     "pytest-mock>=3.10.0",
     "pytest-asyncio>=0.21.0",
-    "black>=23.0.0",
+    # Pinned to the 26.x stable style so CI's `black --check` cannot drift
+    # when a new black release ships next year's formatting rules.
+    "black>=26.0,<27.0",
     "flake8>=6.0.0",
     "mypy>=1.0.0",
     "types-requests>=2.32.0",
     "pre-commit>=3.0.0",
     "bandit>=1.7.0",
-    "safety>=2.3.0",
+    "pip-audit>=2.7.0",
 ]
 testing = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pytest-mock>=3.10.0",
     "pytest-asyncio>=0.21.0",
+]
+performance = [
+    "psutil>=5.9.0",
 ]
 redis = [
     "redis>=4.5.0",

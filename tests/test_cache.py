@@ -298,7 +298,7 @@ class TestCacheManager:
     def test_cache_manager_redis_backend(self, config_redis):
         """Test cache manager with Redis backend."""
         redis = pytest.importorskip("redis")
-        
+
         with patch.object(redis, "from_url") as mock_redis_from_url:
             mock_redis_client = Mock()
             mock_redis_from_url.return_value = mock_redis_client
@@ -312,7 +312,7 @@ class TestCacheManager:
     def test_cache_manager_redis_import_error(self, config_redis):
         """Test fallback to memory cache when Redis import fails."""
         redis = pytest.importorskip("redis")
-        
+
         with patch.object(redis, "from_url") as mock_redis_from_url:
             mock_redis_from_url.side_effect = ImportError("Redis not available")
 
@@ -325,7 +325,7 @@ class TestCacheManager:
     def test_cache_manager_redis_connection_error(self, config_redis):
         """Test fallback to memory cache when Redis connection fails."""
         redis = pytest.importorskip("redis")
-        
+
         with patch.object(redis, "from_url") as mock_redis_from_url:
             mock_redis_from_url.side_effect = Exception("Connection failed")
 
