@@ -10,7 +10,7 @@ asyncio-throttle>=1.0.0
 
 # Caching
 redis>=4.5.0
-cachetools>=5.3.0
+cachetools>=7.1.2
 
 # Rate limiting
 tenacity>=8.2.0
