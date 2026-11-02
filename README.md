@@ -1,5 +1,8 @@
 # ITGlue Python SDK
 
+> [!WARNING]
+> **py-itglue is retired and no longer maintained.** Active development continues in [node-it-glue](https://github.com/WYRE-AI/node-it-glue) (Node.js/TypeScript). For AI or MCP tooling on IT Glue, see [itglue-mcp](https://github.com/WYRE-AI/itglue-mcp). See the [retirement announcement](https://github.com/asachs01/py-itglue/issues/41). This repository will be archived (read-only) on Nov 16, 2026.
+
 A comprehensive Python SDK for the ITGlue API with AI agent capabilities.
 
 ## Overview
